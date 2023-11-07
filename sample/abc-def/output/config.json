@@ -1,0 +1,14 @@
+{
+    "type_mapping": {
+        "feat1_1": "float",
+        "feat1_2": "float",
+        "feat2_1": "float",
+        "feat2_2": "float"
+    },
+    "name_mapping": {
+        "feat1_1": "feat1_1",
+        "feat1_2": "feat1_2",
+        "feat2_1": "feat2_1",
+        "feat2_2": "feat2_2"
+    }
+}

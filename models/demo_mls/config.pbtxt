@@ -26,20 +26,27 @@
 
 name: "demo_mls"
 backend: "python"
-default_model_filename: "abc-def-ghi"
+default_model_filename: "abc-def"
 
 input [
   {
     name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 2 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
     data_type: TYPE_FP32
-    dims: [ 4 ]
+    dims: [ 2 ]
   }
 ]
 output [
   {
     name: "OUTPUT0"
     data_type: TYPE_FP32
-    dims: [ 4 ]
+    dims: [ 2 ]
   }
 ]
 

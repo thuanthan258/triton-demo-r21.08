@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 # Input your configured Environment variable here
 # For example, we want to get config value a, with default value 0 as in the snippet beflow
@@ -17,7 +18,9 @@ def rename_column(input_col: str):
     new_column = f"{input_col}"
     return new_column
 
-def execute(df: pd.DataFrame, model_weight=None):
+def execute(
+    df: pd.DataFrame, model = None
+    ):
     """
     Transform the data
     This will apply any logic you write here to the data passing through the block.
@@ -32,11 +35,21 @@ def execute(df: pd.DataFrame, model_weight=None):
         "model": None,
         "max_historical_days": 0
     }
-    _df = df.copy()
+    df = df.copy()
 
     # TODO: implement your logic here
 
     # For any transformation with model, you should return
     # return _df, model_weight
-    result["data"] = _df
+    columns = list(df.columns)
+    if model is None:
+        print("Running test, loading model!")
+        model = MinMaxScaler()
+        model.fit(df[columns])        
+        result["model"] = model
+
+    df[columns] = model.fit_transform(df[columns])
+
+    result["data"] = df
     return result
+    

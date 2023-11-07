@@ -3,7 +3,7 @@ import pandas as pd
 
 # Input your configured Environment variable here
 # For example, we want to get config value a, with default value 0 as in the snippet beflow
-window = int(os.getenv("window", 2)) # User input this
+window = int(os.getenv("window", 3)) # User input this
 
 
 def rename_column(input_col: str):

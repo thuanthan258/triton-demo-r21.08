@@ -4,12 +4,16 @@ import pickle
 import triton_python_backend_utils as pb_utils
 
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
     that is created must have "TritonPythonModel" as the class name.
     """
+    def get_timeseries_data(self, feats: list,num_historical_days: int):
+      return pd.DataFrame([[1 for i in range(len(feats))] for j in range(num_historical_days)], columns=feats)
+
     def read_function_from_file(self, file_path: str) -> callable:
       """
       Reads a function from a file and returns it.
@@ -67,7 +71,7 @@ class TritonPythonModel:
         block_execution_id = model_config["default_model_filename"]
 
         # Load config from postgres
-        postgres_config = {
+        self.postgres_config = {
           "topo_ids": ["input", "block_1", "block_2", "block_3", "output"],
           "blocks": {
             "input": {
@@ -101,12 +105,16 @@ class TritonPythonModel:
           if os.path.isfile(code_path):
             code_module = self.read_function_from_file(code_path)
             self.block_config[block_id]["module"] = code_module
+          else:
+            self.block_config[block_id]["module"] = None
 
           model_path = os.path.join(path, "model.pickle")
           if os.path.isfile(model_path):
             with open(model_path, 'rb') as f:
               model = pickle.load(f)
             self.block_config[block_id]["model"] = model
+          else:
+            self.block_config[block_id]["model"] = None
         logger.info(self.block_config)
         self.output0_dtype = np.float64
 
@@ -115,31 +123,60 @@ class TritonPythonModel:
       data = requests[0]
       logger.info(data.inputs())
       for request in requests:
-          # Get INPUT0
-          in_0 = pb_utils.get_input_tensor_by_name(request, "INPUT0")
-          in_1 = pb_utils.get_input_tensor_by_name(request, "INPUT1")
-          logger.info(dir(in_0))
-          logger.info(in_0.as_numpy())
-          logger.info(in_1.as_numpy())
+        # Get INPUT0
+        in_0 = pb_utils.get_input_tensor_by_name(request, "INPUT0")
+        in_1 = pb_utils.get_input_tensor_by_name(request, "INPUT1")
+        logger.info(dir(in_0))
 
+        cols = [i.decode("ascii") for i in in_0.as_numpy()]
+        feats = [in_1.as_numpy()]
 
-          # Create output tensors. You need pb_utils.Tensor
-          # objects to create pb_utils.InferenceResponse.
-          out_tensor_0 = pb_utils.Tensor("OUTPUT0",
-                                          out_0.astype(output0_dtype))
-          out_tensor_1 = pb_utils.Tensor("OUTPUT0",
-                                          out_0.astype(output0_dtype))
+        df = pd.DataFrame(feats, columns=cols)
+        logger.info(df)
+        current_df = df.copy()
 
-          # Create InferenceResponse. You can set an error here in case
-          # there was a problem with handling this inference request.
-          # Below is an example of how you can set errors in inference
-          # response:
-          #
-          # pb_utils.InferenceResponse(
-          #    output_tensors=..., TritonError("An error occured"))
-          inference_response = pb_utils.InferenceResponse(
-              output_tensors=[out_tensor_0])
-          responses.append(inference_response)
+        # Process the df
+        topo_ids = self.postgres_config["topo_ids"]
+        for _id in topo_ids:
+          current_config = self.block_config[_id]
+          historical_days = self.postgres_config["blocks"][_id]["max_historical_days"]
+          if historical_days != 0:
+            ts_df = self.get_timeseries_data(feats=cols, num_historical_days=historical_days)
+            current_df = pd.concat([ts_df, current_df], axis=0)
+            logger.info(f"DF with ts: \n{current_df}")
+          if _id == "input":
+            continue
+          
+          current_df = current_df[current_config["input_columns"]]
+          if current_config["module"]:
+            module = current_config["module"]
+            if current_config["model"]:
+              current_df = module(current_df, current_config["model"])
+              logger.info("Transformed with model")
+            else:
+              current_df = module(current_df)
+            current_df = current_df["data"][-1:]
+            logger.info(f"DF after transform: \n{current_df}")
+        logger.info(current_df)
+            
+        out_0 = current_df.values[-1]
+        output0_dtype = self.output0_dtype
+        # Create output tensors. You need pb_utils.Tensor
+        # objects to create pb_utils.InferenceResponse.
+        out_tensor_0 = pb_utils.Tensor("OUTPUT0", out_0.astype(output0_dtype))
+
+        # Create InferenceResponse. You can set an error here in case
+        # there was a problem with handling this inference request.
+        # Below is an example of how you can set errors in inference
+        # response:
+        #
+        # pb_utils.InferenceResponse(
+        #    output_tensors=..., TritonError("An error occurred"))
+        inference_response = pb_utils.InferenceResponse(
+            output_tensors=[out_tensor_0]
+        )
+        responses.append(inference_response)
+
 
       # You should return a list of pb_utils.InferenceResponse. Length
       # of this list must match the length of `requests` list.

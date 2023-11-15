@@ -1,0 +1,38 @@
+name: "output"
+backend: "python"
+default_model_filename: "/opt/tritonserver/triton-demo-r21.08/sample/abc-def/block_1"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 2 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_FP32
+    dims: [ 2 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 2 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP32
+    dims: [ 2 ]
+  }
+]
+
+instance_group [
+  { 
+    kind: KIND_CPU 
+  }
+]

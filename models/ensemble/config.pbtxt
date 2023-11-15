@@ -1,0 +1,94 @@
+name: "ensemble"
+platform: "ensemble"
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 2 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_FP64
+    dims: [ 2 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 2 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ 2 ]
+  }
+]
+ensemble_scheduling {
+  step [
+    {
+      model_name: "block_1"
+      model_version: 1
+      input_map {
+        key: "INPUT0"
+        value: "INPUT0"
+      }
+      input_map {
+        key: "INPUT1"
+        value: "INPUT1"
+      }
+      output_map {
+        key: "OUTPUT0"
+        value: "block_1_col_output"
+      }
+      output_map {
+        key: "OUTPUT1"
+        value: "block_1_value_output"
+      }    
+    },
+    {
+      model_name: "block_2"
+      model_version: 1
+      input_map {
+        key: "INPUT0"
+        value: "block_1_col_output"
+      }
+      input_map {
+        key: "INPUT1"
+        value: "block_1_value_output"
+      }
+      output_map {
+        key: "OUTPUT0"
+        value: "block_2_col_output"
+      }
+      output_map {
+        key: "OUTPUT1"
+        value: "block_2_value_output"
+      }    
+    },
+        {
+      model_name: "block_3"
+      model_version: 1
+      input_map {
+        key: "INPUT0"
+        value: "block_2_col_output"
+      }
+      input_map {
+        key: "INPUT1"
+        value: "block_2_value_output"
+      }
+      output_map {
+        key: "OUTPUT0"
+        value: "OUTPUT0"
+      }
+      output_map {
+        key: "OUTPUT1"
+        value: "OUTPUT1"
+      }    
+    }
+  ]
+}

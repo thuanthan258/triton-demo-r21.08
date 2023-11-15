@@ -32,7 +32,7 @@ def execute(
     result = {
         "data": None,
         "model": None,
-        "max_historical_days": 0
+        "max_historical_days": 1
     }
     df = df.copy()
 

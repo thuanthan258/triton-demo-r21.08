@@ -2,7 +2,7 @@ import json
 import os
 import pickle
 import triton_python_backend_utils as pb_utils
-
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from loguru import logger
@@ -55,8 +55,8 @@ class TritonPythonModel:
           * model_name: Model name
         """
         model_config = json.loads(args["model_config"])
-        config_path = model_config["default_model_filename"]
-        config_file = os.path.join(config_path, "config.json")
+        config_path = Path(__file__).resolve().parent
+        config_file = os.path.join(config_path, "config/config.json")
         logger.info(config_file)
         with open(config_file, "r") as f:
             config = json.load(f)

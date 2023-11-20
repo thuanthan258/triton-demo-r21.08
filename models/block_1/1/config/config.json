@@ -1,0 +1,12 @@
+{
+
+    "type_mapping": {
+        "feat1": "float",
+        "feat2": "float"
+    },
+    "name_mapping": {
+        "feat1": "feat1",
+        "feat2": "feat2"
+    },
+    "max_historical_days": 1
+}

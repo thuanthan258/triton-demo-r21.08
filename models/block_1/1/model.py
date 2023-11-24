@@ -65,14 +65,14 @@ class TritonPythonModel:
         self.block_config["input_columns"] = input_columns
         self.block_config["max_historical_days"] = config["max_historical_days"]
         
-        code_path = os.path.join(config_path, "code.py")
+        code_path = os.path.join(config_path, "config/code.py")
         if os.path.isfile(code_path):
             code_module = self.read_function_from_file(code_path)
             self.block_config["module"] = code_module
         else:
             self.block_config["module"] = None
 
-        model_path = os.path.join(config_path, "model.pickle")
+        model_path = os.path.join(config_path, "config/model.pickle")
         if os.path.isfile(model_path):
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)

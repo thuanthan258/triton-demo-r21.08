@@ -54,6 +54,7 @@ class TritonPythonModel:
           * model_version: Model version
           * model_name: Model name
         """
+        logger.info(f"The data is {help(pb_utils.InferenceRequest)}")
         model_config = json.loads(args["model_config"])
         config_path = Path(__file__).resolve().parent
         config_file = os.path.join(config_path, "config/config.json")

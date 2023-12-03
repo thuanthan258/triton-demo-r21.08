@@ -1,0 +1,37 @@
+name: "ensemble"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 3 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_FP64
+    dims: [ 3 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 23 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ 23 ]
+  }
+]
+
+instance_group [
+  { 
+    kind: KIND_CPU 
+  }
+]

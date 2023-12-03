@@ -4,11 +4,11 @@ import tritonclient.http as httpclient
 
 import numpy as np
 
-model_name = "block_1"
-shape = [2]
+model_name = "final_model"
+shape = [3]
 
 with httpclient.InferenceServerClient("localhost:8000") as client:
-    input0_data = np.array(["feat1", "feat2"]).astype(np.object_)
+    input0_data = np.array(["Timestamp", "feat_1", "feat_2"]).astype(np.object_)
     input1_data = np.random.rand(*shape).astype(np.float64)
     inputs = [
         httpclient.InferInput("INPUT0", input0_data.shape,

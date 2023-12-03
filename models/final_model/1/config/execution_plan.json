@@ -7,40 +7,36 @@
         "output"
     ],
     "block_1": {
-        "inputs": [
-            {
-                "input": {
-                    "input_cols": [
-                        "Timestamp"
-                    ],
-                    "data_path": "/not_use_when_serving",
-                    "name_mapping": {
-                        "Timestamp": "Timestamp"
-                    }
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "Timestamp"
+                ],
+                "data_path": "/not_use_when_serving",
+                "name_mapping": {
+                    "Timestamp": "Timestamp"
                 }
             }
-        ],
+        },
         "output_cols": [
             "Timestamp"
         ],
         "max_historical_days": 0
     },
     "block_2": {
-        "inputs": [
-            {
-                "input": {
-                    "input_cols": [
-                        "feat_1",
-                        "feat_2"
-                    ],
-                    "data_path": "/not_use_when_serving",
-                    "name_mapping": {
-                        "feat_1": "feat_1",
-                        "feat_2": "feat_2"
-                    }
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "feat_1",
+                    "feat_2"
+                ],
+                "data_path": "/not_use_when_serving",
+                "name_mapping": {
+                    "feat_1": "feat_1",
+                    "feat_2": "feat_2"
                 }
             }
-        ],
+        },
         "output_cols": [
             "feat_1",
             "feat_2"
@@ -48,21 +44,19 @@
         "max_historical_days": 1
     },
     "block_3": {
-        "inputs": [
-            {
-                "input": {
-                    "input_cols": [
-                        "feat_1",
-                        "feat_2"
-                    ],
-                    "data_path": "/not_use_when_serving",
-                    "name_mapping": {
-                        "feat_1": "feat_1",
-                        "feat_2": "feat_2"
-                    }
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "feat_1",
+                    "feat_2"
+                ],
+                "data_path": "/not_use_when_serving",
+                "name_mapping": {
+                    "feat_1": "feat_1",
+                    "feat_2": "feat_2"
                 }
             }
-        ],
+        },
         "output_cols": [
             "feat_1",
             "feat_2"

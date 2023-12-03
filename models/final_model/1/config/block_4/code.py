@@ -3,7 +3,8 @@ import pandas as pd
 
 # Input your configured Environment variable here
 # For example, we want to get config value a, with default value 0 as in the snippet beflow
-window = int(os.getenv("window", 3)) # User input this
+print(os.environ)
+window = int(os.getenv("max_historical_days", 0)) # User input this
 
 
 def rename_column(input_col: str):
@@ -34,6 +35,7 @@ def execute(
         "model": None,
         "max_historical_days": window_size
     }
+    print(f"Window size is {window_size}")
     df = df.copy()
 
     # TODO: implement your logic here
@@ -42,7 +44,7 @@ def execute(
     # return _df, model_weight
     for column in df.columns:
         # For each column, create lag features up to the specified window size
-        for lag in range(1, window_size):
+        for lag in range(1, window_size + 1):
             # The new feature is added to the DataFrame with a name in the format column_lag
             df[column + "_" + str(lag)] = df[column].shift(lag)
 

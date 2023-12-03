@@ -1,4 +1,4 @@
-name: "ensemble"
+name: "final_model"
 backend: "python"
 
 input [

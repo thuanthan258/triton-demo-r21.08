@@ -3,7 +3,7 @@ import pandas as pd
 
 # Input your configured Environment variable here
 # For example, we want to get config value a, with default value 0 as in the snippet beflow
-# a = int(os.getenv("a", "0")) # User input this
+max_historical_days = int(os.getenv("max_historical_days", "0")) # User input this
 
 
 def rename_column(input_col: str):

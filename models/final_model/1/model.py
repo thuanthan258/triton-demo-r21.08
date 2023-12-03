@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+
 class TritonPythonModel:
     def read_function_from_file(self, file_path: str) -> callable:
         """
@@ -35,8 +36,11 @@ class TritonPythonModel:
             # Return the function from the namespace
             return namespace["execute"]
 
-    def get_timeseries_data(self, feats: list,num_historical_days: int):
-      return pd.DataFrame([[1 for i in range(len(feats))] for j in range(num_historical_days)], columns=feats)
+    def get_timeseries_data(self, feats: list, num_historical_days: int):
+        return pd.DataFrame(
+            [[1 for i in range(len(feats))] for j in range(num_historical_days)],
+            columns=feats,
+        )
 
     def initialize(self, args):
         """`initialize` is called only once when the model is being loaded.
@@ -64,17 +68,18 @@ class TritonPythonModel:
 
         for _id in self.topo_ids:
             current_block_folder = os.path.join(config_path, f"config/{_id}")
-            
+
             module = None
             model = None
-            # Load code module 
+            # Load code module
             module_file = os.path.join(current_block_folder, "code.py")
             if os.path.isfile(module_file):
-                module = self.read_function_from_file(module_file)
-            
+                # module = self.read_function_from_file(module_file)
+                module = module_file
+
             model_file = os.path.join(current_block_folder, "model.pickle")
             if os.path.isfile(model_file):
-                with open(model_file) as f:
+                with open(model_file, 'rb') as f:
                     model = pickle.load(f)
             self.modules[_id] = module
             self.models[_id] = model
@@ -103,7 +108,7 @@ class TritonPythonModel:
                 max_historical_days: int = current_config["max_historical_days"]
 
                 all_parents = []
-                for parent_id, parent_config in parents.items:
+                for parent_id, parent_config in parents.items():
                     input_cols: str = parent_config["input_cols"]
                     name_mapping: dict = parent_config["name_mapping"]
                     parent_df: pd.DataFrame = block_output[parent_id].copy()
@@ -113,10 +118,16 @@ class TritonPythonModel:
                 current_df: pd.DataFrame = pd.concat(all_parents, axis=1)
 
                 if max_historical_days != 0:
-                    historical_df: pd.DataFrame = self.get_timeseries_data(current_df.columns, max_historical_days)
+                    os.environ["max_historical_days"] = str(max_historical_days)
+                    historical_df: pd.DataFrame = self.get_timeseries_data(
+                        current_df.columns, max_historical_days
+                    )
                     current_df = pd.concat([historical_df, current_df], axis=0)
 
-                module = self.modules[_id]
+                module = None
+                module_file = self.modules[_id]
+                if module_file:
+                    module = self.read_function_from_file(module_file)
                 model = self.models[_id]
                 if module:
                     if model:
@@ -127,7 +138,12 @@ class TritonPythonModel:
                     current_df = current_df["data"][-1:]
                     logger.info(f"DF after transform: \n{current_df}")
                 logger.info(current_df)
-            
+                logger.info(f"The  id is {_id}")
+                logger.info(f"The input cols are {current_df.columns}")
+                logger.info(f"The dataframe is \n{current_df}")
+
+                block_output[_id] = current_df
+
             final_df = block_output["output"]
             out_0 = final_df.values[-1]
             out_1 = np.array(list(final_df.columns)).astype(np.object_)
@@ -143,7 +159,6 @@ class TritonPythonModel:
             )
             responses.append(inference_response)
 
-
             return responses
 
     def finalize(self):
@@ -151,4 +166,4 @@ class TritonPythonModel:
         Implementing `finalize` function is OPTIONAL. This function allows
         the model to perform any necessary clean ups before exit.
         """
-        print('Cleaning up...')
+        print("Cleaning up...")

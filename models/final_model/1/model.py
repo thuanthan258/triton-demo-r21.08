@@ -89,7 +89,7 @@ class TritonPythonModel:
         )
         self.client = TimeseriesDBClient(
             x_subscription_id="",
-            x_tentant_id="",
+            x_tenant_id="",
             settings=settings,
         )
 

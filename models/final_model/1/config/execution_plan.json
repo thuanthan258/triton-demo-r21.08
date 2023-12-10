@@ -21,7 +21,8 @@
         "output_cols": [
             "Timestamp"
         ],
-        "max_historical_days": 0
+        "max_historical_days": 0,
+        "env_var": {}
     },
     "block_2": {
         "inputs": {
@@ -41,8 +42,9 @@
             "feat_1",
             "feat_2"
         ],
-        "max_historical_days": 1
-    },
+        "max_historical_days": 1,
+        "env_var": {}
+s    },
     "block_3": {
         "inputs": {
             "input": {
@@ -61,7 +63,8 @@
             "feat_1",
             "feat_2"
         ],
-        "max_historical_days": 0
+        "max_historical_days": 0,
+        "env_var": {}
     },
     "block_4": {
         "inputs": {
@@ -101,7 +104,10 @@
             "feat_2_9",
             "feat_2_10"
         ],
-        "max_historical_days": 10
+        "max_historical_days": 10,
+        "env_var": {
+            "window": 10
+        }
     },
     "output": {
         "inputs": {

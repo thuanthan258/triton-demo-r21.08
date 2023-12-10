@@ -4,7 +4,7 @@ import pandas as pd
 # Input your configured Environment variable here
 # For example, we want to get config value a, with default value 0 as in the snippet beflow
 print(os.environ)
-window = int(os.getenv("max_historical_days", 0)) # User input this
+window = int(os.getenv("window", 0))  # User input this
 
 
 def rename_column(input_col: str):
@@ -18,9 +18,8 @@ def rename_column(input_col: str):
     new_column = f"{input_col}"
     return new_column
 
-def execute(
-    df: pd.DataFrame, weight=None, window_size: int=window
-    ):
+
+def execute(df: pd.DataFrame, weight=None, window_size: int = window):
     """
     Transform the data
     This will apply any logic you write here to the data passing through the block.
@@ -30,12 +29,7 @@ def execute(
     Model weight and be the weight of the model, or the full model object. The service will pickle it for later use.
     As default, result will be the same as df
     """
-    result = {
-        "data": None,
-        "model": None,
-        "max_historical_days": window_size
-    }
-    print(f"Window size is {window_size}")
+    result = {"data": None, "model": None, "max_historical_days": window_size}
     df = df.copy()
 
     # TODO: implement your logic here
@@ -50,4 +44,3 @@ def execute(
 
     result["data"] = df
     return result
-    

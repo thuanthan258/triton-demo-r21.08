@@ -6,21 +6,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from loguru import logger
-from pydantic import Optional, BaseSettings
-from mls_ml_libs.db.timeseries import TimeseriresDBClient
-
-
-class TestSettings(BaseSettings):
-    Redis__Host: str
-    Redis__Port: str
-    Redis__Database: str
-    Redis__Password: Optional[str]
-    Redis__Ssl: str
-    Redis__User: Optional[str]
-    Authentication__ClientId: str
-    Authentication__ClientSecret: str
-    Authentication__Authority: str
-    API__TimeseriesDB__Execute__Url: str
 
 
 class TritonPythonModel:
@@ -73,25 +58,6 @@ class TritonPythonModel:
           * model_version: Model version
           * model_name: Model name
         """
-        # TODO: Implement time series db client when ready
-        settings = TestSettings(
-            API__TimeseriesDB__Execute__Url="",
-            Authentication__Authority="",
-            Authentication__ClientId="",
-            Authentication__ClientSecret="",
-            Redis__Database=0,
-            Redis__Host="127.0.0.1",
-            Redis__Password=None,
-            Redis__Port=6379,
-            Redis__Ssl=False,
-            Redis__User=None,
-        )
-        self.client = TimeseriresDBClient(
-            x_subscription_id="",
-            x_tentant_id="",
-            settings=settings,
-        )
-
         config_path = Path(__file__).resolve().parent
         config_file = os.path.join(config_path, "config/execution_plan.json")
         with open(config_file) as f:
@@ -113,7 +79,7 @@ class TritonPythonModel:
 
             model_file = os.path.join(current_block_folder, "model.pickle")
             if os.path.isfile(model_file):
-                with open(model_file, "rb") as f:
+                with open(model_file, 'rb') as f:
                     model = pickle.load(f)
             self.modules[_id] = module
             self.models[_id] = model
@@ -151,10 +117,6 @@ class TritonPythonModel:
                     all_parents.append(parent_df)
                 current_df: pd.DataFrame = pd.concat(all_parents, axis=1)
 
-                if current_config["env_var"]:
-                    for key, val in current_config["env_var"].items():
-                        os.environ[key] = str(val)
-
                 if max_historical_days != 0:
                     os.environ["max_historical_days"] = str(max_historical_days)
                     historical_df: pd.DataFrame = self.get_timeseries_data(
@@ -179,9 +141,6 @@ class TritonPythonModel:
                 logger.info(f"The  id is {_id}")
                 logger.info(f"The input cols are {current_df.columns}")
                 logger.info(f"The dataframe is \n{current_df}")
-
-                if current_config["env_var"]:
-                    del os.environ[key]
 
                 block_output[_id] = current_df
 

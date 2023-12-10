@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from loguru import logger
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from typing import Optional
 from mls_ml_libs.db.timeseries import TimeseriresDBClient
 

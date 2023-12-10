@@ -87,7 +87,7 @@ class TritonPythonModel:
             Redis__Ssl=False,
             Redis__User=None,
         )
-        self.client = TimeseriresDBClient(
+        self.client = TimeseriesDBClient(
             x_subscription_id="",
             x_tentant_id="",
             settings=settings,

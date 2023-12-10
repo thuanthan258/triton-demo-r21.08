@@ -197,6 +197,7 @@
             "feat_2_9",
             "feat_2_10"
         ],
-        "max_historical_days": 0
+        "max_historical_days": 0,
+        "env_var": {}
     }
 }

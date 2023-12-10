@@ -13,10 +13,10 @@ from mls_ml_libs.db.timeseries import TimeseriesDBClient
 
 class TestSettings(BaseSettings):
     Redis__Host: str
-    Redis__Port: str
-    Redis__Database: str
+    Redis__Port: int
+    Redis__Database: int
     Redis__Password: Optional[str]
-    Redis__Ssl: str
+    Redis__Ssl: bool
     Redis__User: Optional[str]
     Authentication__ClientId: str
     Authentication__ClientSecret: str

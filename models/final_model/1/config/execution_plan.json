@@ -44,7 +44,7 @@
         ],
         "max_historical_days": 1,
         "env_var": {}
-s    },
+    },
     "block_3": {
         "inputs": {
             "input": {

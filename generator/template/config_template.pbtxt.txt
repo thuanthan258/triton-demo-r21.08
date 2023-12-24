@@ -1,0 +1,37 @@
+name: "{{execution_id}}"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ {{input_dim}} ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_FP64
+    dims: [ {{input_dim}} ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ {{output_dim}} ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ {{output_dim}} ]
+  }
+]
+
+instance_group [
+  { 
+    kind: KIND_CPU 
+  }
+]

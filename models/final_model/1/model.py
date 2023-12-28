@@ -66,6 +66,10 @@ class TritonPythonModel:
         timestamp: int,
         timescale_client: TimeseriesDBClient = None,
     ):
+        logger.info(f"\tFeatures: {feats}")
+        logger.info(f"\tNumber historical days: {num_historical_days}")
+        logger.info(f"\tTimestamp: {timestamp}")
+
         if not timescale_client:
             return pd.DataFrame(
                 [[1 for i in range(len(feats))] for j in range(num_historical_days)],
@@ -77,20 +81,21 @@ class TritonPythonModel:
         # https://github.com/triton-inference-server/server/issues/3671
         response = loop.run_until_complete(
             timescale_client.get_data_from_db(
-                data_key="{{execution_id}}",
+                data_key="{{timeseries_db_key}}",
                 data_metrics=feats,
-                from_timestamp=timestamp - num_historical_days - 10,
+                from_timestamp=timestamp - 2000,
                 to_timestamp=timestamp,
             )
         )
-
+        logger.info(f"Done getting data! {response}")
         # Build dataframe
-        df = pd.DataFrame(
-            {
-                feats[i]: [j["value"] for j in response[i]["values"]]
-                for i in range(len(feats))
-            }
-        )
+        result_dict = {}
+        for i, name in enumerate(feats):
+            current_values = response[i]["values"]
+            for val in current_values:
+                result_dict[i].append(val["value"])
+        logger.info(f"Result is {result_dict}")
+        df = pd.DataFrame(result_dict)
         return df[-num_historical_days:]
 
     def initialize(self, args):
@@ -111,11 +116,13 @@ class TritonPythonModel:
         """
         # TODO: Implement time series db client when ready
         settings = TestSettings()
-        self.client = TimeseriesDBClient(
-            x_subscription_id=settings.x_subscription_id,
-            x_tenant_id=settings.x_tenant_id,
-            settings=settings,
-        )
+        # TODO: Fix when update TimeseriesDBClient
+        # self.client = TimeseriesDBClient(
+        #     x_subscription_id=settings.x_subscription_id,
+        #     x_tenant_id=settings.x_tenant_id,
+        #     settings=settings,
+        # )
+        self.client = None
 
         config_path = str(Path(__file__).resolve().parent)
         config_file = os.path.join(config_path, "config/execution_plan.json")
@@ -182,9 +189,9 @@ class TritonPythonModel:
 
                 if max_historical_days != 0:
                     os.environ["max_historical_days"] = str(max_historical_days)
-                    current_timestamp = datetime.datetime.now().timestamp()
+                    current_timestamp = 1577852940 + 1000
                     historical_df: pd.DataFrame = self.get_timeseries_data(
-                        feats=current_df.columns,
+                        feats=list(current_df.columns),
                         num_historical_days=max_historical_days,
                         timestamp=current_timestamp,
                         timescale_client=self.client,

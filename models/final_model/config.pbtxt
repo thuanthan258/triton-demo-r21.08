@@ -1,4 +1,4 @@
-name: "final_model_2"
+name: "final_model"
 backend: "python"
 
 input [

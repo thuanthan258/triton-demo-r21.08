@@ -66,6 +66,7 @@ class TritonPythonModel:
         timestamp: int,
         timescale_client: TimeseriesDBClient = None,
     ):
+        timescale_client = None
         if not timescale_client:
             return pd.DataFrame(
                 [[1 for i in range(len(feats))] for j in range(num_historical_days)],
@@ -75,7 +76,7 @@ class TritonPythonModel:
 
         # Http client doesn't support async, so this is a workaround
         # https://github.com/triton-inference-server/server/issues/3671
-        response = loop.run_until_complete(
+        df = loop.run_until_complete(
             timescale_client.get_data_from_db(
                 data_key="{{execution_id}}",
                 data_metrics=feats,
@@ -84,13 +85,7 @@ class TritonPythonModel:
             )
         )
 
-        # Build dataframe
-        df = pd.DataFrame(
-            {
-                feats[i]: [j["value"] for j in response[i]["values"]]
-                for i in range(len(feats))
-            }
-        )
+        print(df)        
         return df[-num_historical_days:]
 
     def initialize(self, args):
@@ -154,7 +149,16 @@ class TritonPythonModel:
             in_1 = pb_utils.get_input_tensor_by_name(request, "INPUT1")
 
             cols = [i.decode("ascii") for i in in_0.as_numpy()]
-            feats = [in_1.as_numpy()]
+            feats = [i.decode("ascii") for i in in_1.as_numpy()]
+
+            full_map = dict(zip(cols, feats))
+            mode = full_map["mode"]
+            data_key = full_map["data_key"]
+            del full_map["mode"]
+            del full_map["data_key"]
+
+            cols = list(full_map.keys())
+            feats = [[float(i) for i in full_map.values()]]
 
             df = pd.DataFrame(feats, columns=cols)
             logger.info(df)
@@ -184,7 +188,7 @@ class TritonPythonModel:
                     os.environ["max_historical_days"] = str(max_historical_days)
                     current_timestamp = datetime.datetime.now().timestamp()
                     historical_df: pd.DataFrame = self.get_timeseries_data(
-                        feats=current_df.columns,
+                        feats=list(current_df.columns),
                         num_historical_days=max_historical_days,
                         timestamp=current_timestamp,
                         timescale_client=self.client,

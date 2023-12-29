@@ -5,14 +5,14 @@ input [
   {
     name: "INPUT0"
     data_type: TYPE_STRING
-    dims: [ 3 ]
+    dims: [ 5 ]
   }
 ]
 input [
   {
     name: "INPUT1"
-    data_type: TYPE_FP64
-    dims: [ 3 ]
+    data_type: TYPE_STRING
+    dims: [ 5 ]
   }
 ]
 output [

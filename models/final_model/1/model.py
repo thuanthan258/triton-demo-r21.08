@@ -64,6 +64,7 @@ class TritonPythonModel:
         feats: list,
         num_historical_days: int,
         timestamp: int,
+        data_key: str,
         timescale_client: TimeseriesDBClient = None,
     ):
         logger.info(f"\tFeatures: {feats}")
@@ -81,7 +82,7 @@ class TritonPythonModel:
         # https://github.com/triton-inference-server/server/issues/3671
         response = loop.run_until_complete(
             timescale_client.get_data_from_db(
-                data_key="{{timeseries_db_key}}",
+                data_key=data_key,
                 data_metrics=feats,
                 from_timestamp=timestamp - 2000,
                 to_timestamp=timestamp,
@@ -162,6 +163,15 @@ class TritonPythonModel:
 
             cols = [i.decode("ascii") for i in in_0.as_numpy()]
             feats = [in_1.as_numpy()]
+
+            full_map = zip(cols, feats)
+            mode = full_map["mode"]
+            data_key = full_map["data_key"]
+            del full_map["mode"]
+            del full_map["data_key"]
+
+            cols = list(full_map.keys())
+            feats = list(full_map.values())
 
             df = pd.DataFrame(feats, columns=cols)
             logger.info(df)

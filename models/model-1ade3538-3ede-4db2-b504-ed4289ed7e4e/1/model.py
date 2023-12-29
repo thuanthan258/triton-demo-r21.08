@@ -66,7 +66,6 @@ class TritonPythonModel:
         timestamp: int,
         timescale_client: TimeseriesDBClient = None,
     ):
-        timescale_client = None
         if not timescale_client:
             return pd.DataFrame(
                 [[1 for i in range(len(feats))] for j in range(num_historical_days)],
@@ -80,7 +79,7 @@ class TritonPythonModel:
             timescale_client.get_data_from_db(
                 data_key="{{execution_id}}",
                 data_metrics=feats,
-                from_timestamp=timestamp - num_historical_days - 10,
+                from_timestamp=timestamp - num_historical_days - 1000,
                 to_timestamp=timestamp,
             )
         )

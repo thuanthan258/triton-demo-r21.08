@@ -1,0 +1,37 @@
+name: "model-1ade3538-3ede-4db2-b504-ed4289ed7e4e-2"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 5 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_STRING
+    dims: [ 5 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 23 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ 23 ]
+  }
+]
+
+instance_group [
+  { 
+    kind: KIND_CPU 
+  }
+]

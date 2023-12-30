@@ -1,0 +1,198 @@
+{
+    "topo_ids": [
+        "block_1",
+        "block_2",
+        "block_3",
+        "block_4",
+        "output"
+    ],
+    "block_1": {
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "Timestamp"
+                ],
+                "name_mapping": {
+                    "Timestamp": "Timestamp"
+                }
+            }
+        },
+        "output_cols": [
+            "Timestamp"
+        ],
+        "max_historical_days": 0,
+        "env_var": {}
+    },
+    "block_2": {
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "feat1",
+                    "feat2"
+                ],
+                "name_mapping": {
+                    "feat1": "feat1",
+                    "feat2": "feat2"
+                }
+            }
+        },
+        "output_cols": [
+            "feat1",
+            "feat2"
+        ],
+        "max_historical_days": 1,
+        "env_var": {}
+    },
+    "block_3": {
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "feat1",
+                    "feat2"
+                ],
+                "name_mapping": {
+                    "feat1": "feat1",
+                    "feat2": "feat2"
+                }
+            }
+        },
+        "output_cols": [
+            "feat1",
+            "feat2"
+        ],
+        "max_historical_days": 0,
+        "env_var": {}
+    },
+    "block_4": {
+        "inputs": {
+            "input": {
+                "input_cols": [
+                    "feat1",
+                    "feat2"
+                ],
+                "name_mapping": {
+                    "feat1": "feat1",
+                    "feat2": "feat2"
+                }
+            }
+        },
+        "output_cols": [
+            "feat1",
+            "feat2",
+            "feat1_1",
+            "feat1_2",
+            "feat1_3",
+            "feat1_4",
+            "feat1_5",
+            "feat1_6",
+            "feat1_7",
+            "feat1_8",
+            "feat1_9",
+            "feat1_10",
+            "feat2_1",
+            "feat2_2",
+            "feat2_3",
+            "feat2_4",
+            "feat2_5",
+            "feat2_6",
+            "feat2_7",
+            "feat2_8",
+            "feat2_9",
+            "feat2_10"
+        ],
+        "max_historical_days": 10,
+        "env_var": {
+            "window": 10
+        }
+    },
+    "output": {
+        "inputs": {
+            "block_1": {
+                "input_cols": [
+                    "Timestamp"
+                ],
+                "name_mapping": {
+                    "Timestamp": "Timestamp"
+                }
+            },
+            "block_4": {
+                "input_cols": [
+                    "feat1",
+                    "feat2",
+                    "feat1_1",
+                    "feat1_2",
+                    "feat1_3",
+                    "feat1_4",
+                    "feat1_5",
+                    "feat1_6",
+                    "feat1_7",
+                    "feat1_8",
+                    "feat1_9",
+                    "feat1_10",
+                    "feat2_1",
+                    "feat2_2",
+                    "feat2_3",
+                    "feat2_4",
+                    "feat2_5",
+                    "feat2_6",
+                    "feat2_7",
+                    "feat2_8",
+                    "feat2_9",
+                    "feat2_10"
+                ],
+                "data_path": "/not_use_when_serving",
+                "name_mapping": {
+                    "feat1": "feat1",
+                    "feat2": "feat2",
+                    "feat1_1": "feat1_1",
+                    "feat1_2": "feat1_2",
+                    "feat1_3": "feat1_3",
+                    "feat1_4": "feat1_4",
+                    "feat1_5": "feat1_5",
+                    "feat1_6": "feat1_6",
+                    "feat1_7": "feat1_7",
+                    "feat1_8": "feat1_8",
+                    "feat1_9": "feat1_9",
+                    "feat1_10": "feat1_10",
+                    "feat2_1": "feat2_1",
+                    "feat2_2": "feat2_2",
+                    "feat2_3": "feat2_3",
+                    "feat2_4": "feat2_4",
+                    "feat2_5": "feat2_5",
+                    "feat2_6": "feat2_6",
+                    "feat2_7": "feat2_7",
+                    "feat2_8": "feat2_8",
+                    "feat2_9": "feat2_9",
+                    "feat2_10": "feat2_10"
+                }
+            }
+        },
+        "output_cols": [
+            "Timestamp",
+            "feat1",
+            "feat2",
+            "feat1_1",
+            "feat1_2",
+            "feat1_3",
+            "feat1_4",
+            "feat1_5",
+            "feat1_6",
+            "feat1_7",
+            "feat1_8",
+            "feat1_9",
+            "feat1_10",
+            "feat2_1",
+            "feat2_2",
+            "feat2_3",
+            "feat2_4",
+            "feat2_5",
+            "feat2_6",
+            "feat2_7",
+            "feat2_8",
+            "feat2_9",
+            "feat2_10"
+        ],
+        "max_historical_days": 0,
+        "env_var": {}
+    }
+}

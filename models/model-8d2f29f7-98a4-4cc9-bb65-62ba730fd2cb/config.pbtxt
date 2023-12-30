@@ -1,0 +1,37 @@
+name: "model-8d2f29f7-98a4-4cc9-bb65-62ba730fd2cb"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 13 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_FP64
+    dims: [ 13 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 133 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ 133 ]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_CPU
+  }
+]

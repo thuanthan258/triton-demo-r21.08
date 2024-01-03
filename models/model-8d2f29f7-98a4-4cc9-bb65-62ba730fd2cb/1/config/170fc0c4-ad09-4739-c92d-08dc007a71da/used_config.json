@@ -1,0 +1,7 @@
+{
+    "average": [-1, 0, 1],
+    "min_max_sklearn_config": {
+        "min": -1,
+        "max": 1
+    }
+}

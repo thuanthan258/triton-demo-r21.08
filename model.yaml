@@ -1,0 +1,47 @@
+Name:         model-7780a172-0064-4305-a9a5-6dc65fa56f99
+Namespace:    modelmesh-serving
+Labels:       <none>
+Annotations:  serving.kserve.io/deploymentMode: ModelMesh
+              serving.kserve.io/schemaPath: model-7780a172-0064-4305-a9a5-6dc65fa56f99/schema.json
+              serving.kserve.io/secretKey: localMinIO
+API Version:  serving.kserve.io/v1beta1
+Kind:         InferenceService
+Metadata:
+  Creation Timestamp:  2023-12-31T15:41:12Z
+  Generation:          1
+  Resource Version:    381709084
+  UID:                 d8a17683-37a4-46da-a3db-adf78f3d5029
+Spec:
+  Predictor:
+    Tensorflow:
+      Name:              kserve-container
+      Protocol Version:  v2
+      Resources:
+        Limits:
+          Cpu:     1
+          Memory:  2Gi
+        Requests:
+          Cpu:          1
+          Memory:       2Gi
+      Runtime Version:  
+      Storage Uri:      s3://modelmesh-models/model-7780a172-0064-4305-a9a5-6dc65fa56f99/srcnn_model.savedmodel
+Status:
+  Conditions:
+    Last Transition Time:  2023-12-31T16:06:45Z
+    Status:                False
+    Type:                  PredictorReady
+    Last Transition Time:  2023-12-31T16:06:45Z
+    Status:                False
+    Type:                  Ready
+  Model Status:
+    Copies:
+      Failed Copies:  0
+    Last Failure Info:
+      Message:              No ServingRuntime supports specified model type and/or protocol
+      Model Revision Name:  model-7780a172-0064-4305-a9a5-6dc65fa56f99__isvc
+      Reason:               NoSupportingRuntime
+      Time:                 2023-12-31T16:06:29Z
+    States:
+      Active Model State:  FailedToLoad
+    Transition Status:     UpToDate
+Events:                    <none>

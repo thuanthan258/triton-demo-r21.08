@@ -18,9 +18,8 @@ def rename_column(input_col: str):
     new_column = f"{input_col}"
     return new_column
 
-def execute(
-    df: pd.DataFrame, model = None
-    ):
+
+def execute(df: pd.DataFrame, model=None):
     """
     Transform the data
     This will apply any logic you write here to the data passing through the block.
@@ -30,11 +29,7 @@ def execute(
     Model weight and be the weight of the model, or the full model object. The service will pickle it for later use.
     As default, result will be the same as df
     """
-    result = {
-        "data": None,
-        "model": None,
-        "max_historical_days": 0
-    }
+    result = {"data": None, "model": None, "max_historical_days": 0}
     df = df.copy()
 
     # TODO: implement your logic here
@@ -45,11 +40,28 @@ def execute(
     if model is None:
         print("Running test, loading model!")
         model = MinMaxScaler()
-        model.fit(df[columns])        
+        model.fit(df[columns])
         result["model"] = model
 
     df[columns] = model.fit_transform(df[columns])
 
     result["data"] = df
     return result
-    
+
+
+[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+
+def execute(data):
+    average = sum(data) / len(data)  # -> [2, 5, 8]
+    return data - average, average  # -> [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]]
+
+
+def serving_forward(data, average):
+    # Data only have 1 row, how to calculate average?
+    # Solution: reuse average
+    return data - average
+
+
+def serving_backward(data, average):
+    return data + average

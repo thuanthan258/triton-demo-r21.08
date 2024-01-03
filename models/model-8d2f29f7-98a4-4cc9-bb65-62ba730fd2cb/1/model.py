@@ -107,6 +107,7 @@ class TritonPythonModel:
         """
         # TODO: Implement time series db client when ready
         settings = TestSettings()
+
         self.client = TimeseriesDBClient(
             x_subscription_id=settings.x_subscription_id,
             x_tenant_id=settings.x_tenant_id,

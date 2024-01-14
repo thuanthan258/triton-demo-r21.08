@@ -40,7 +40,7 @@ class MinMaxTransform(BaseTransform):
             scaler = pickle.load(f)
         print(df.columns)
         print(scaler.n_features_in_)
-        result = scaler.transform(df)
+        result = scaler.transform(df.values)
         return pd.DataFrame(result, columns=df.columns)
 
     def backward(self, df: pd.DataFrame):

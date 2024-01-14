@@ -289,6 +289,8 @@ class Graph:
         self.outputs_dataframes["input"] = input_dataframe
 
         for node_id in self.topological_order:  # renamed node_name to node_id
+            if node_id == "input":
+                continue
             logging.info(f"[EXECUTE NODE] - {node_id}")
 
             # Get node

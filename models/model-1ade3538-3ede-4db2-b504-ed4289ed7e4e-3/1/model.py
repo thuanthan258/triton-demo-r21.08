@@ -171,6 +171,9 @@ class TritonPythonModel:
             block_output["input"] = current_df
 
             for _id in self.topo_ids:
+                if _id == "input":
+                    continue
+
                 current_config: dict = self.config[_id]
                 parents: dict = current_config["inputs"]
                 max_historical_days: int = current_config["max_historical_days"]

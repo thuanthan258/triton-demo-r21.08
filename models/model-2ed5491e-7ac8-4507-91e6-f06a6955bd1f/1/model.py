@@ -201,10 +201,7 @@ class Node:
 
 
 class Graph:
-    def __init__(
-        self, working_dir: str = "", timeseries_client: TimeseriesDBClient = None
-    ):
-        self.working_dir = working_dir
+    def __init__(self, timeseries_client: TimeseriesDBClient = None):
         self.nodes = {}  # Stores node instances
         self.dependencies = {}  # Maps node names to their dependencies
         self.outputs_dataframes = {}  # Stores the output dataframes of the nodes
@@ -235,7 +232,7 @@ class Graph:
         for node_config in nodes_configs:
             node = Node(
                 id=node_config["id"],
-                config_path=os.path.join(self.working_dir, node_config["id"]),
+                config_path=os.path.join(config_dir, node_config["id"]),
                 init_kwargs=node_config["init_kwargs"],
                 transform_class=node_config["transform_class"],
                 parents=node_config["parents"],

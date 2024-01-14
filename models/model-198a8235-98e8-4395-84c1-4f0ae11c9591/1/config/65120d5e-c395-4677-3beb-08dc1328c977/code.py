@@ -12,17 +12,15 @@ class MinMaxTransform(BaseTransform):
         super().__init__(working_dir, **kwargs)
         self.init_kwargs = {}
         if kwargs:
-          self.init_kwargs = dict(kwargs)
+            self.init_kwargs = dict(kwargs)
 
     def get_serving_config(self):
-        serving_config = {
-          "historical_days": 0
-        }
+        serving_config = {"historical_days": 0}
         return serving_config
 
     def get_init_kwargs(self):
         return self.init_kwargs
-  
+
     def compute_columns_name(self, columns: List[str]) -> List[str]:
         return [f"{i}" for i in columns]
 
@@ -40,6 +38,8 @@ class MinMaxTransform(BaseTransform):
         model_path = os.path.join(self.working_dir, "model.pickle")
         with open(model_path, "rb") as f:
             scaler = pickle.load(f)
+        features = scaler.get_feature_names_out()
+        df = df[features]
         result = scaler.transform(df)
         return pd.DataFrame(result, columns=df.columns)
 

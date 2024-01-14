@@ -9,7 +9,7 @@ from datetime import datetime
 from pydantic_settings import BaseSettings
 
 from mls_ml_libs.db.timeseries import TimeseriesDBClient
-from data_processing_libs.modelmesh.graph import Graph
+from data_processing_libs.serving.graph import Graph
 
 
 class TestSettings(BaseSettings):
@@ -31,7 +31,6 @@ settings = TestSettings()
 
 
 class TritonPythonModel:
-
     def initialize(self, args):
         """`initialize` is called only once when the model is being loaded.
         Implementing `initialize` function is optional. This function allows
@@ -69,7 +68,11 @@ class TritonPythonModel:
         logger.log("Initialize-Specific Msg!", logger.INFO)
         now = datetime.now()  # current date and time
 
-        logging.basicConfig(filename=f'{now.strftime("%Y%m%d%H%M%S")}-output.txt', level=logging.DEBUG, format='')
+        logging.basicConfig(
+            filename=f'{now.strftime("%Y%m%d%H%M%S")}-output.txt',
+            level=logging.DEBUG,
+            format="",
+        )
 
         responses = []
         for request in requests:
@@ -92,7 +95,7 @@ class TritonPythonModel:
             # mode = full_map["mode"]
             data_key = full_map["data_key"]
 
-            timestamp = full_map['Timestamp']
+            timestamp = full_map["Timestamp"]
 
             del full_map["mode"]
             del full_map["data_key"]
@@ -107,8 +110,8 @@ class TritonPythonModel:
 
             logger.log(f"[GRAPH] Initilizing....")
 
-            logging.info('[GRAPH] Initilizing....')
-            logging.info(f'[Input DF] {current_df}')
+            logging.info("[GRAPH] Initilizing....")
+            logging.info(f"[Input DF] {current_df}")
 
             self.graph.initialize()
 
@@ -121,7 +124,7 @@ class TritonPythonModel:
                 name_mapping=data_mapping,
                 data_key=data_key,
                 to_timestamp=timestamp,
-                logging=logging
+                logging=logging,
             )
 
             logging.info(f"[FINAL RESULT] {result_df}")

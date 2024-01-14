@@ -3,7 +3,7 @@ import tritonclient.http as httpclient
 import json
 import numpy as np
 
-model_name = "model-2ed5491e-7ac8-4507-91e6-f06a6955bd1f"
+model_name = "model-198a8235-98e8-4395-84c1-4f0ae11c9591"
 shape = [5]
 
 with httpclient.InferenceServerClient("localhost:8000") as client:
@@ -18,7 +18,6 @@ with httpclient.InferenceServerClient("localhost:8000") as client:
     input1_data = np.array(values).astype(np.object_)
 
     name_mapping = {i: i for i in feates}
-    name_mapping["Timestamp"] = "Timestamp"
     name_mapping = np.array([json.dumps(name_mapping)]).astype(np.object_)
 
     print(input1_data)

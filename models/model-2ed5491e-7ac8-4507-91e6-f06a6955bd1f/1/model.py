@@ -6,6 +6,7 @@ import triton_python_backend_utils as pb_utils
 from pathlib import Path
 import os
 from datetime import timedelta
+from loguru import logger
 
 from typing import Optional
 from datetime import datetime
@@ -284,29 +285,29 @@ class Graph:
             )
             input_dataframe = pd.concat([history_data_df, input_dataframe], axis=0)
 
-        logging.info(f"[INPUT DF] {input_dataframe}")
+        logger.info(f"[INPUT DF] {input_dataframe}")
 
         self.outputs_dataframes["input"] = input_dataframe
 
         for node_id in self.topological_order:  # renamed node_name to node_id
             if node_id == "input":
                 continue
-            logging.info(f"[EXECUTE NODE] - {node_id}")
+            logger.info(f"[EXECUTE NODE] - {node_id}")
 
             # Get node
             node = self.nodes[node_id]
 
-            logging.info(f"INFO: {node.__dict__}")
-            logging.info(f"[*] {self.outputs_dataframes}")
+            logger.info(f"INFO: {node.__dict__}")
+            logger.info(f"[*] {self.outputs_dataframes}")
 
             # Get node input df
             node_input_df = select_columns_with_filter(
                 self.outputs_dataframes, node.input_features, logging=logging
             )
-            logging.info(f"[NODE INPUT DF] {node_input_df}")
+            logger.info(f"[NODE INPUT DF] {node_input_df}")
 
             node_result = node.execute(node_input_df)
-            logging.info(f"[NODE RESULT] {node_result}")
+            logger.info(f"[NODE RESULT] {node_result}")
 
             self.outputs_dataframes[
                 node_id

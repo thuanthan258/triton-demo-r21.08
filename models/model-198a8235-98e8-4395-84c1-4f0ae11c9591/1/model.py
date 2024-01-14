@@ -134,7 +134,7 @@ class GetHistoryData:
             from_timestamp=from_timestamp,
             to_timestamp=to_timestamp,
         )
-        logging.info(f"[TIMESERIES DF] {df}")
+        logger.info(f"[TIMESERIES DF] {df}")
 
         df.rename(columns=revert_mapping, inplace=True)
 

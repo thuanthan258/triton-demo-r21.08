@@ -3,6 +3,8 @@ import logging
 import numpy as np
 import pandas as pd
 import triton_python_backend_utils as pb_utils
+from pathlib import Path
+import os
 
 from typing import Optional
 from datetime import datetime
@@ -113,7 +115,9 @@ class TritonPythonModel:
             logging.info("[GRAPH] Initilizing....")
             logging.info(f"[Input DF] {current_df}")
 
-            self.graph.initialize()
+            config_path = str(Path(__file__).resolve().parent)
+            config_path = os.path.join(config_path, "config/")
+            self.graph.initialize(config_path)
 
             logger.log(f"[GRAPH] Initilized")
 

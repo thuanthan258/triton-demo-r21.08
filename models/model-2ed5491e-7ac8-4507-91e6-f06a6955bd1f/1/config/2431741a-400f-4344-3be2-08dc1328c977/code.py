@@ -36,7 +36,7 @@ class MinMaxTransform(BaseTransform):
 
     def forward(self, df: pd.DataFrame):
         model_path = os.path.join(self.working_dir, "model.pickle")
-        print(model_path)
+        print(os.path.abspath(model_path))
         with open(model_path, "rb") as f:
             scaler = pickle.load(f)
         print(df.columns)

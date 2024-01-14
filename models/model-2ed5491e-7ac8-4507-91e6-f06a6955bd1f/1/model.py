@@ -144,6 +144,7 @@ class Node:
         parents,
         input_features,
         expected_outputs,
+        config_path,
     ):
         """
         Initialize a Node object.
@@ -157,9 +158,9 @@ class Node:
         """
         self.id = id
         self.init_kwargs = init_kwargs
-        self.transform_class = import_class(f"config.{id}.code", transform_class)(
-            working_dir="./", **self.init_kwargs
-        )
+        self.transform_class = import_class(
+            os.path.join(config_path, "code.py"), transform_class
+        )(working_dir=config_path, **self.init_kwargs)
         self.parents = parents  # list of Node objects
         self.input_features = input_features
         self.expected_outputs = expected_outputs
@@ -200,7 +201,10 @@ class Node:
 
 
 class Graph:
-    def __init__(self, timeseries_client: TimeseriesDBClient = None):
+    def __init__(
+        self, working_dir: str = "", timeseries_client: TimeseriesDBClient = None
+    ):
+        self.working_dir = working_dir
         self.nodes = {}  # Stores node instances
         self.dependencies = {}  # Maps node names to their dependencies
         self.outputs_dataframes = {}  # Stores the output dataframes of the nodes
@@ -231,6 +235,7 @@ class Graph:
         for node_config in nodes_configs:
             node = Node(
                 id=node_config["id"],
+                config_path=os.path.join(self.working_dir, node_config["id"]),
                 init_kwargs=node_config["init_kwargs"],
                 transform_class=node_config["transform_class"],
                 parents=node_config["parents"],
@@ -402,14 +407,15 @@ class TritonPythonModel:
             logging.info(f"[Input DF] {current_df}")
 
             config_path = str(Path(__file__).resolve().parent)
-            config_path = os.path.join(config_path, "config/")
-            self.graph.initialize(config_dir=config_path)
+            self.config_path = os.path.join(config_path, "config/")
+            self.graph.initialize(config_dir=self.config_path)
 
             logger.log(f"[GRAPH] Initilized")
 
             logger.log(f"[GRAPH] Executing...")
 
             result_df = self.graph.execute(
+                config_path=self.config_path,
                 input_dataframe=current_df,
                 name_mapping=data_mapping,
                 data_key=data_key,

@@ -117,7 +117,7 @@ class TritonPythonModel:
 
             config_path = str(Path(__file__).resolve().parent)
             config_path = os.path.join(config_path, "config/")
-            self.graph.initialize(config_path)
+            self.graph.initialize(config_dir=config_path)
 
             logger.log(f"[GRAPH] Initilized")
 

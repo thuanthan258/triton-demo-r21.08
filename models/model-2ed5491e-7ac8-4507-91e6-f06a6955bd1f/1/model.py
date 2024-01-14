@@ -39,12 +39,24 @@ import pandas as pd
 
 from typing import Dict
 from mls_ml_libs.db.timeseries import TimeseriesDBClient
+from data_processing_libs.transforms import BaseTransform
+import ast
 
 CONFIG_FILE_NAME = "graph_configs.yaml"
 ROOT_DIR = os.getcwd()
 
 import pandas as pd
 import importlib
+
+
+def read_class_from_file(module_path: str, class_name: str):
+    spec = importlib.util.spec_from_file_location(class_name, module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    # Get the class from the module
+    custom_class = getattr(module, class_name)
+    return custom_class
 
 
 def get_previous_timestamp(timestamp, nb_previous_periods: int, data_unit: str):
@@ -158,9 +170,9 @@ class Node:
         """
         self.id = id
         self.init_kwargs = init_kwargs
-        print(config_path)
-        self.transform_class = import_class(
-            os.path.join(config_path, "code.py"), transform_class
+        module_path = os.path.join(config_path, "code.py")
+        self.transform_class = read_class_from_file(
+            module_path=module_path, class_name=transform_class
         )(working_dir=config_path, **self.init_kwargs)
         self.parents = parents  # list of Node objects
         self.input_features = input_features

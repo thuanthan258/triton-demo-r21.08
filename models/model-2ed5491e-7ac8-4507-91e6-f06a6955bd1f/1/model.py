@@ -425,7 +425,6 @@ class TritonPythonModel:
             logger.log(f"[GRAPH] Executing...")
 
             result_df = self.graph.execute(
-                config_path=self.config_path,
                 input_dataframe=current_df,
                 name_mapping=data_mapping,
                 data_key=data_key,

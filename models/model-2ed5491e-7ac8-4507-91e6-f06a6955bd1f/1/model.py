@@ -383,7 +383,7 @@ class TritonPythonModel:
             # mode = full_map["mode"]
             data_key = full_map["data_key"]
 
-            timestamp = full_map["Timestamp"]
+            timestamp = int(full_map["Timestamp"])
 
             del full_map["mode"]
             del full_map["data_key"]

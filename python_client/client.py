@@ -18,6 +18,7 @@ with httpclient.InferenceServerClient("localhost:8000") as client:
     input1_data = np.array(values).astype(np.object_)
 
     name_mapping = {i: i for i in feates}
+    name_mapping["Timestamp"] = "Timestamp"
     name_mapping = np.array([json.dumps(name_mapping)]).astype(np.object_)
 
     print(input1_data)

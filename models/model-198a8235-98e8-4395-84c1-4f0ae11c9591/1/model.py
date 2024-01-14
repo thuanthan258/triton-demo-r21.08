@@ -291,8 +291,10 @@ class Graph:
         # if history
         if self.history_data_retriever:
             logging.info("[GRAPH] [TIMESERIES] Querying data....")
+            logger.info(f"The timestamp is {to_timestamp}")
+            logger.info(f"The data key is {data_key}")
             history_data_df = self.history_data_retriever.query_timeseries_data(
-                feats=list(input_dataframe.columns),
+                feats=list(name_mapping.keys()),
                 data_key=data_key,
                 to_timestamp=to_timestamp,
                 name_mapping=name_mapping,

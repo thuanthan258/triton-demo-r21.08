@@ -244,7 +244,7 @@ class Graph:
 
             self.history_data_retriever = GetHistoryData(
                 num_historical_periods=self.timeseries_metadata.get(
-                    "max_historical_periods"
+                    "max_historical_days"
                 ),
                 data_unit=self.timeseries_metadata.get("data_unit"),
                 timescale_client=self.timeseries_client,

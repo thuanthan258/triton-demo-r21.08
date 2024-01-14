@@ -158,6 +158,7 @@ class Node:
         """
         self.id = id
         self.init_kwargs = init_kwargs
+        print(config_path)
         self.transform_class = import_class(
             os.path.join(config_path, "code.py"), transform_class
         )(working_dir=config_path, **self.init_kwargs)

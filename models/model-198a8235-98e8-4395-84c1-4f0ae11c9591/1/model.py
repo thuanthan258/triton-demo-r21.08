@@ -229,7 +229,6 @@ class TimeseriesDBClient(object):
         }
 
         # Send request and handle response
-        print(urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH))
         response = await self.get_response(
             api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
             payload=payload,
@@ -278,7 +277,6 @@ class TimeseriesDBClient(object):
         if "error" in response or not response.get("isSuccess"):
             return response
 
-        logger.info(f"Data inserted successfully for key: {data_key}")
         return response
 
     def get_response_sync(self, api_url, payload):
@@ -324,19 +322,10 @@ class TimeseriesDBClient(object):
             "FromTimestamp": from_timestamp - 1000,
             "ToTimestamp": to_timestamp,
         }
-        print(data_key)
-        print(data_metrics)
-
-        print(from_timestamp)
-        print(to_timestamp)
-        # Send request and handle response
-        print(self.api_execute_timeseries_database_url)
-        print(urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH))
         response = self.get_response_sync(
             api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
             payload=payload,
         )
-        print(response)
 
         if "error" in response or not isinstance(response, list):
             return response
@@ -388,7 +377,6 @@ class GetHistoryData:
             from_timestamp=from_timestamp,
             to_timestamp=to_timestamp,
         )
-        logger.info(f"[TIMESERIES DF] {df}")
 
         df.rename(columns=revert_mapping, inplace=True)
 
@@ -545,8 +533,6 @@ class Graph:
         # if history
         if self.history_data_retriever:
             logging.info("[GRAPH] [TIMESERIES] Querying data....")
-            logger.info(f"The timestamp is {to_timestamp}")
-            logger.info(f"The data key is {data_key}")
             history_data_df = self.history_data_retriever.query_timeseries_data(
                 feats=list(name_mapping.keys()),
                 data_key=data_key,
@@ -556,20 +542,14 @@ class Graph:
             )
             input_dataframe = pd.concat([history_data_df, input_dataframe], axis=0)
 
-        logger.info(f"[INPUT DF] {input_dataframe}")
-
         self.outputs_dataframes["input"] = input_dataframe
 
         for node_id in self.topological_order:  # renamed node_name to node_id
             if node_id == "input":
                 continue
-            logger.info(f"[EXECUTE NODE] - {node_id}")
 
             # Get node
             node = self.nodes[node_id]
-
-            logger.info(f"INFO: {node.__dict__}")
-            logger.info(f"[*] {self.outputs_dataframes}")
 
             # Get node input df
             node_input_df = select_columns_with_filter(

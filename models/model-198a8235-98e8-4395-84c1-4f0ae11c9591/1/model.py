@@ -324,6 +324,9 @@ class TimeseriesDBClient(object):
             "FromTimestamp": from_timestamp - 1000,
             "ToTimestamp": to_timestamp,
         }
+        print(data_key)
+        print(data_metrics)
+
         print(from_timestamp)
         print(to_timestamp)
         # Send request and handle response

@@ -336,6 +336,7 @@ class TimeseriesDBClient(object):
             api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
             payload=payload,
         )
+        print(response)
 
         if "error" in response or not isinstance(response, list):
             return response

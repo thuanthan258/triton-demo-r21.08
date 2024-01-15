@@ -12,8 +12,6 @@ from typing import Optional
 from datetime import datetime
 from pydantic_settings import BaseSettings
 
-from mls_ml_libs.db.timeseries import TimeseriesDBClient
-
 
 class TestSettings(BaseSettings):
     Redis__Host: str = ""
@@ -88,6 +86,256 @@ def select_columns_with_filter(dict_dfs, filters, logging=logging):
             filtered_df = df_with_cols.rename(columns=filter_dict)
             result_df = pd.concat([result_df, filtered_df], axis=1)
     return result_df
+
+
+from mls_ml_libs.oauth2.auth import MLSOAuth2Client
+from mls_ml_libs.cache.redis_client import RedisClient
+from typing import Dict, List
+import inspect
+from urllib.parse import urljoin
+from pydantic_settings import BaseSettings
+import requests
+
+logger = logging.getLogger(__name__)
+
+QUERY_DATA_PATH = "tms/TimeSeries/query"
+REGISTER_METRICS_PATH = "tms/TimeSeries/register-metrics-labels"
+INSERT_DATA_PATH = "tms/TimeSeries/metrics"
+
+
+class TimeseriesDBClient(object):
+    """
+    Client for interacting with a time series database.
+    """
+
+    def __init__(
+        self,
+        x_tenant_id: str,
+        x_subscription_id: str,
+        settings: BaseSettings,
+    ) -> None:
+        """
+        Initialize the client with tenant ID, subscription ID, and settings.
+        """
+        # Setup Redis client
+        redis_settings = {
+            "host": settings.Redis__Host,
+            "port": settings.Redis__Port,
+            "db": settings.Redis__Database,
+            "password": settings.Redis__Password,
+            "use_ssl": settings.Redis__Ssl,
+            "username": settings.Redis__User,
+        }
+        self._redis_client = RedisClient(**redis_settings)
+
+        # Setup OAuth2 client
+        auth_settings = {
+            "client_id": settings.Authentication__ClientId,
+            "client_secret": settings.Authentication__ClientSecret,
+            "auth_url": settings.Authentication__Authority,
+            "redis_client": self._redis_client,
+        }
+        self._oauth_client = MLSOAuth2Client(**auth_settings)
+
+        # Setup other attributes
+        self.api_execute_timeseries_database_url = (
+            settings.API__TimeseriesDB__Execute__Url
+        )
+        self.headers = {
+            "Content-Type": "application/json",
+            "x-tenant-id": x_tenant_id,
+            "x-subscription-id": x_subscription_id,
+        }
+        self.token = None
+
+    async def __aenter__(self):
+        """
+        Asynchronously enter the runtime context related to this object.
+        """
+        self.token = await self._oauth_client.get_token()
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        """
+        Asynchronously exit the runtime context related to this object.
+        """
+        ...
+
+    async def get_response(self, api_url, payload):
+        """
+        Send a POST request to the given URL with the given payload, and return the response.
+        """
+        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
+
+        response = requests.request(
+            "POST",
+            api_url,
+            headers=headers,
+            data=json.dumps(payload),
+        )
+
+        # Check for errors
+        if response.status_code != 200:
+            return {"error": response.text}
+
+        return json.loads(response.text)
+
+    def handle_request_response(self, response_content: List, data_metrics: List):
+        """
+        Handle the response content from a request.
+        """
+        try:
+            # Check for errors
+            if "error" in response_content:
+                return response_content
+
+            result = {}
+            for i, metric in enumerate(data_metrics):
+                result[metric] = [j["value"] for j in response_content[i]["values"]]
+
+            # Convert to DataFrame
+            df = pd.DataFrame(result)
+            return df
+
+        except Exception as e:
+            error_str = f"[TimeseriesDBClient] Error handling request response: {e}"
+            logger.error(error_str)
+            return {"error": error_str}
+
+    async def get_data_from_db(
+        self,
+        data_key: str,
+        data_metrics: List[str],
+        from_timestamp: int,
+        to_timestamp: int,
+    ):
+        """
+        Get data from the database for the given key and metrics, between the given timestamps.
+        """
+        # Get access token
+        if not self.token:
+            self.token = await self._oauth_client.get_token()
+
+        # Check timestamps
+        if from_timestamp > to_timestamp:
+            return {"error": "from_timestamp must be less than to_timestamp"}
+
+        # Prepare payload
+        payload = {
+            "key": data_key,
+            "metrics": data_metrics,
+            "FromTimestamp": from_timestamp,
+            "ToTimestamp": to_timestamp,
+        }
+
+        # Send request and handle response
+        print(urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH))
+        response = await self.get_response(
+            api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
+            payload=payload,
+        )
+
+        if "error" in response or not isinstance(response, list):
+            return response
+
+        return self.handle_request_response(response, data_metrics)
+
+    async def register_metrics_key(self, key: str, metrics: List[str]):
+        """
+        Register a new metrics key.
+        """
+        # Prepare payload
+        payload = {"key": key, "metrics": metrics}
+
+        # Send request and return response
+        response = await self.get_response(
+            api_url=urljoin(
+                self.api_execute_timeseries_database_url, REGISTER_METRICS_PATH
+            ),
+            payload=payload,
+        )
+        return response
+
+    async def insert_data_to_db(
+        self, data_key: str, data_metrics_dict: Dict[str, float], timestamp: int
+    ):
+        """
+        Insert data into the database.
+        """
+        # Prepare payload
+        payload = {
+            "key": data_key,
+            "metrics": data_metrics_dict,
+            "Timestamp": timestamp,
+        }
+
+        # Send request and handle response
+        response = await self.get_response(
+            api_url=urljoin(self.api_execute_timeseries_database_url, INSERT_DATA_PATH),
+            payload=payload,
+        )
+
+        if "error" in response or not response.get("isSuccess"):
+            return response
+
+        logger.info(f"Data inserted successfully for key: {data_key}")
+        return response
+
+    def get_response_sync(self, api_url, payload):
+        """
+        Send a POST request to the given URL with the given payload, and return the response.
+        """
+        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
+
+        response = requests.request(
+            "POST",
+            api_url,
+            headers=headers,
+            data=json.dumps(payload),
+        )
+
+        # Check for errors
+        if response.status_code != 200:
+            return {"error": response.text}
+
+        return json.loads(response.text)
+
+    def get_timeseries_data_sync(
+        self,
+        data_key: str,
+        data_metrics: List[str],
+        from_timestamp: int,
+        to_timestamp: int,
+    ):
+        """
+        Get data from the database for the given key and metrics, between the given timestamps.
+        """
+        if not self.token:
+            self.token = self._oauth_client.get_token()
+
+        # Check timestamps
+        if from_timestamp > to_timestamp:
+            return {"error": "from_timestamp must be less than to_timestamp"}
+
+        # Prepare payload
+        payload = {
+            "key": data_key,
+            "metrics": data_metrics,
+            "FromTimestamp": from_timestamp,
+            "ToTimestamp": to_timestamp,
+        }
+        # Send request and handle response
+        print(self.api_execute_timeseries_database_url)
+        print(urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH))
+        response = self.get_response_sync(
+            api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
+            payload=payload,
+        )
+
+        if "error" in response or not isinstance(response, list):
+            return response
+
+        return self.handle_request_response(response, data_metrics)
 
 
 class GetHistoryData:

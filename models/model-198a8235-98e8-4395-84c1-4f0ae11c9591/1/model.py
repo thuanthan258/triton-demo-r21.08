@@ -311,7 +311,7 @@ class TimeseriesDBClient(object):
         Get data from the database for the given key and metrics, between the given timestamps.
         """
         if not self.token:
-            self.token = self._oauth_client._get_new_token()
+            self.token = self._oauth_client._get_new_token()["access_token"]
         print(self.token)
         # Check timestamps
         if from_timestamp > to_timestamp:
@@ -321,7 +321,7 @@ class TimeseriesDBClient(object):
         payload = {
             "key": data_key,
             "metrics": data_metrics,
-            "FromTimestamp": from_timestamp,
+            "FromTimestamp": from_timestamp - 1000,
             "ToTimestamp": to_timestamp,
         }
         print(from_timestamp)

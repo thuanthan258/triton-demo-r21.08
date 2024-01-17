@@ -3,6 +3,8 @@ import logging
 import numpy as np
 import pandas as pd
 import triton_python_backend_utils as pb_utils
+import yaml
+from typing import Dict, List
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -11,6 +13,10 @@ from loguru import logger
 from typing import Optional
 from datetime import datetime
 from pydantic_settings import BaseSettings
+from mls_ml_libs.db.timeseries import TimeseriesDBClient
+from data_processing_libs.serving.graph import Graph
+import importlib
+from data_processing_libs.utils import get_previous_timestamp
 
 
 class TestSettings(BaseSettings):
@@ -29,52 +35,44 @@ class TestSettings(BaseSettings):
 
 
 settings = TestSettings()
-
-
-import os
-import yaml
-import pandas as pd
-
-from typing import Dict
-from data_processing_libs.transforms import BaseTransform
-import ast
-
 CONFIG_FILE_NAME = "graph_configs.yaml"
-ROOT_DIR = os.getcwd()
-
-import pandas as pd
-import importlib
 
 
-def read_class_from_file(module_path: str, class_name: str):
-    spec = importlib.util.spec_from_file_location(class_name, module_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    # Get the class from the module
-    custom_class = getattr(module, class_name)
-    return custom_class
-
-
-def get_previous_timestamp(timestamp, nb_previous_periods: int, data_unit: str):
-    if data_unit == "second":
-        delta = timedelta(seconds=nb_previous_periods)
-    elif data_unit == "minute":
-        delta = timedelta(minutes=nb_previous_periods)
-    elif data_unit == "hour":
-        delta = timedelta(hours=nb_previous_periods)
-    elif data_unit == "day":
-        delta = timedelta(days=nb_previous_periods)
-    elif data_unit == "week":
-        delta = timedelta(weeks=nb_previous_periods)
-    else:
-        raise ValueError("Invalid data_unit")
-
-    previous_timestamp = timestamp - int(delta.total_seconds())
-    return previous_timestamp
+def import_class(module_path, class_name):
+    module = importlib.import_module(module_path)
+    class_obj = getattr(module, class_name)
+    return class_obj
 
 
 def select_columns_with_filter(dict_dfs, filters, logging=logging):
+    """
+    Selects columns from multiple DataFrames based on the provided filters.
+
+    Args:
+        dict_dfs (dict): A dictionary containing multiple DataFrames.
+            The keys of the dictionary represent the DataFrame names, and the values
+            are the DataFrames themselves.
+        filters (dict): A dictionary containing the column filters for each DataFrame.
+            The keys of the dictionary represent the DataFrame names, and the values
+            are dictionaries where the keys are the original column names and the values
+            are the new column names.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the selected columns from the input DataFrames,
+        concatenated horizontally.
+
+    Example:
+        >>> filters = {"df1": {"col1": "new_col1", "col2": "new_col2"}, "df2": {"col1": "new_col1_1", "col2": "new_col2_1" }}
+        >>> df1 = pd.DataFrame({'col1': [1, 2, 3], 'col2': [4, 5, 6]})
+        >>> df2 = pd.DataFrame({'col1': [7, 8, 9], 'col2': [10, 11, 12]})
+        >>> dict_dfs = {"df1": df1, "df2": df2}
+        >>> result = select_columns_with_filter(dict_dfs, filters)
+        >>> print(result)
+           new_col1  new_col2  new_col1_1  new_col2_1
+        0         1         4           7          10
+        1         2         5           8          11
+        2         3         6           9          12
+    """
     result_df = pd.DataFrame()
     for df_name, df in dict_dfs.items():
         if df_name in filters:
@@ -85,251 +83,6 @@ def select_columns_with_filter(dict_dfs, filters, logging=logging):
             filtered_df = df_with_cols.rename(columns=filter_dict)
             result_df = pd.concat([result_df, filtered_df], axis=1)
     return result_df
-
-
-from mls_ml_libs.oauth2.auth import MLSOAuth2Client
-from mls_ml_libs.cache.redis_client import RedisClient
-from typing import Dict, List
-import inspect
-from urllib.parse import urljoin
-from pydantic_settings import BaseSettings
-import requests
-
-logger = logging.getLogger(__name__)
-
-QUERY_DATA_PATH = "tms/TimeSeries/query"
-REGISTER_METRICS_PATH = "tms/TimeSeries/register-metrics-labels"
-INSERT_DATA_PATH = "tms/TimeSeries/metrics"
-
-
-class TimeseriesDBClient(object):
-    """
-    Client for interacting with a time series database.
-    """
-
-    def __init__(
-        self,
-        x_tenant_id: str,
-        x_subscription_id: str,
-        settings: BaseSettings,
-    ) -> None:
-        """
-        Initialize the client with tenant ID, subscription ID, and settings.
-        """
-        # Setup Redis client
-        redis_settings = {
-            "host": settings.Redis__Host,
-            "port": settings.Redis__Port,
-            "db": settings.Redis__Database,
-            "password": settings.Redis__Password,
-            "use_ssl": settings.Redis__Ssl,
-            "username": settings.Redis__User,
-        }
-        self._redis_client = RedisClient(**redis_settings)
-
-        # Setup OAuth2 client
-        auth_settings = {
-            "client_id": settings.Authentication__ClientId,
-            "client_secret": settings.Authentication__ClientSecret,
-            "auth_url": settings.Authentication__Authority,
-            "redis_client": self._redis_client,
-        }
-        self._oauth_client = MLSOAuth2Client(**auth_settings)
-
-        # Setup other attributes
-        self.api_execute_timeseries_database_url = (
-            settings.API__TimeseriesDB__Execute__Url
-        )
-        self.headers = {
-            "Content-Type": "application/json",
-            "x-tenant-id": x_tenant_id,
-            "x-subscription-id": x_subscription_id,
-        }
-        self.token = None
-
-    async def __aenter__(self):
-        """
-        Asynchronously enter the runtime context related to this object.
-        """
-        self.token = await self._oauth_client.get_token()
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        """
-        Asynchronously exit the runtime context related to this object.
-        """
-        ...
-
-    async def get_response(self, api_url, payload):
-        """
-        Send a POST request to the given URL with the given payload, and return the response.
-        """
-        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-
-        response = requests.request(
-            "POST",
-            api_url,
-            headers=headers,
-            data=json.dumps(payload),
-        )
-
-        # Check for errors
-        if response.status_code != 200:
-            return {"error": response.text}
-
-        return json.loads(response.text)
-
-    def handle_request_response(self, response_content: List, data_metrics: List):
-        """
-        Handle the response content from a request.
-        """
-        try:
-            # Check for errors
-            if "error" in response_content:
-                return response_content
-
-            result = {}
-            for i, metric in enumerate(data_metrics):
-                result[metric] = [j["value"] for j in response_content[i]["values"]]
-
-            # Convert to DataFrame
-            df = pd.DataFrame(result)
-            return df
-
-        except Exception as e:
-            error_str = f"[TimeseriesDBClient] Error handling request response: {e}"
-            logger.error(error_str)
-            return {"error": error_str}
-
-    async def get_data_from_db(
-        self,
-        data_key: str,
-        data_metrics: List[str],
-        from_timestamp: int,
-        to_timestamp: int,
-    ):
-        """
-        Get data from the database for the given key and metrics, between the given timestamps.
-        """
-        # Get access token
-        if not self.token:
-            self.token = await self._oauth_client.get_token()
-
-        # Check timestamps
-        if from_timestamp > to_timestamp:
-            return {"error": "from_timestamp must be less than to_timestamp"}
-
-        # Prepare payload
-        payload = {
-            "key": data_key,
-            "metrics": data_metrics,
-            "FromTimestamp": from_timestamp,
-            "ToTimestamp": to_timestamp,
-        }
-
-        # Send request and handle response
-        response = await self.get_response(
-            api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
-            payload=payload,
-        )
-
-        if "error" in response or not isinstance(response, list):
-            return response
-
-        return self.handle_request_response(response, data_metrics)
-
-    async def register_metrics_key(self, key: str, metrics: List[str]):
-        """
-        Register a new metrics key.
-        """
-        # Prepare payload
-        payload = {"key": key, "metrics": metrics}
-
-        # Send request and return response
-        response = await self.get_response(
-            api_url=urljoin(
-                self.api_execute_timeseries_database_url, REGISTER_METRICS_PATH
-            ),
-            payload=payload,
-        )
-        return response
-
-    async def insert_data_to_db(
-        self, data_key: str, data_metrics_dict: Dict[str, float], timestamp: int
-    ):
-        """
-        Insert data into the database.
-        """
-        # Prepare payload
-        payload = {
-            "key": data_key,
-            "metrics": data_metrics_dict,
-            "Timestamp": timestamp,
-        }
-
-        # Send request and handle response
-        response = await self.get_response(
-            api_url=urljoin(self.api_execute_timeseries_database_url, INSERT_DATA_PATH),
-            payload=payload,
-        )
-
-        if "error" in response or not response.get("isSuccess"):
-            return response
-
-        return response
-
-    def get_response_sync(self, api_url, payload):
-        """
-        Send a POST request to the given URL with the given payload, and return the response.
-        """
-        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-
-        response = requests.request(
-            "POST",
-            api_url,
-            headers=headers,
-            data=json.dumps(payload),
-        )
-
-        # Check for errors
-        if response.status_code != 200:
-            return {"error": response.text}
-
-        return json.loads(response.text)
-
-    def get_timeseries_data_sync(
-        self,
-        data_key: str,
-        data_metrics: List[str],
-        from_timestamp: int,
-        to_timestamp: int,
-    ):
-        """
-        Get data from the database for the given key and metrics, between the given timestamps.
-        """
-        if not self.token:
-            self.token = self._oauth_client._get_new_token()["access_token"]
-        print(self.token)
-        # Check timestamps
-        if from_timestamp > to_timestamp:
-            return {"error": "from_timestamp must be less than to_timestamp"}
-
-        # Prepare payload
-        payload = {
-            "key": data_key,
-            "metrics": data_metrics,
-            "FromTimestamp": from_timestamp - 1000,
-            "ToTimestamp": to_timestamp,
-        }
-        response = self.get_response_sync(
-            api_url=urljoin(self.api_execute_timeseries_database_url, QUERY_DATA_PATH),
-            payload=payload,
-        )
-
-        if "error" in response or not isinstance(response, list):
-            return response
-
-        return self.handle_request_response(response, data_metrics)
 
 
 class GetHistoryData:
@@ -376,16 +129,11 @@ class GetHistoryData:
             from_timestamp=from_timestamp,
             to_timestamp=to_timestamp,
         )
+        logging.info(f"[TIMESERIES DF] {df}")
 
         df.rename(columns=revert_mapping, inplace=True)
 
         return df.iloc[-self.num_historical_periods :]
-
-
-def import_class(module_path, class_name):
-    module = importlib.import_module(module_path)
-    class_obj = getattr(module, class_name)
-    return class_obj
 
 
 class Node:
@@ -397,7 +145,7 @@ class Node:
         parents,
         input_features,
         expected_outputs,
-        config_path,
+        config_path: str = "./",
     ):
         """
         Initialize a Node object.
@@ -411,10 +159,6 @@ class Node:
         """
         self.id = id
         self.init_kwargs = init_kwargs
-        module_path = os.path.join(config_path, "code.py")
-        # self.transform_class = read_class_from_file(
-        #     module_path=module_path, class_name=transform_class
-        # )(working_dir=config_path, **self.init_kwargs)
         self.transform_class = import_class(f"config.{id}.code", transform_class)(
             working_dir=config_path, **self.init_kwargs
         )
@@ -486,16 +230,16 @@ class Graph:
 
         self.topological_order = graph_configs[0]["topo_ids"]
 
-        config_folder = os.path.join(config_dir, "config/")
+        config_path = os.path.join(config_dir, "config/")
         for node_config in nodes_configs:
             node = Node(
                 id=node_config["id"],
-                config_path=os.path.join(config_folder, node_config["id"]),
                 init_kwargs=node_config["init_kwargs"],
                 transform_class=node_config["transform_class"],
                 parents=node_config["parents"],
                 input_features=node_config["inputs"],
                 expected_outputs=node_config["outputs"],
+                config_path=config_path,
             )
             self.add_node(node)
 
@@ -504,7 +248,7 @@ class Graph:
 
             self.history_data_retriever = GetHistoryData(
                 num_historical_periods=self.timeseries_metadata.get(
-                    "max_historical_days"
+                    "max_historical_periods"
                 ),
                 data_unit=self.timeseries_metadata.get("data_unit"),
                 timescale_client=self.timeseries_client,
@@ -537,7 +281,7 @@ class Graph:
         if self.history_data_retriever:
             logging.info("[GRAPH] [TIMESERIES] Querying data....")
             history_data_df = self.history_data_retriever.query_timeseries_data(
-                feats=list(name_mapping.keys()),
+                feats=list(input_dataframe.columns),
                 data_key=data_key,
                 to_timestamp=to_timestamp,
                 name_mapping=name_mapping,
@@ -545,23 +289,27 @@ class Graph:
             )
             input_dataframe = pd.concat([history_data_df, input_dataframe], axis=0)
 
+        logging.info(f"[INPUT DF] {input_dataframe}")
+
         self.outputs_dataframes["input"] = input_dataframe
 
         for node_id in self.topological_order:  # renamed node_name to node_id
-            if node_id == "input":
-                continue
+            logging.info(f"[EXECUTE NODE] - {node_id}")
 
             # Get node
             node = self.nodes[node_id]
+
+            logging.info(f"INFO: {node.__dict__}")
+            logging.info(f"[*] {self.outputs_dataframes}")
 
             # Get node input df
             node_input_df = select_columns_with_filter(
                 self.outputs_dataframes, node.input_features, logging=logging
             )
-            logger.info(f"[NODE INPUT DF] {node_input_df}")
+            logging.info(f"[NODE INPUT DF] {node_input_df}")
 
             node_result = node.execute(node_input_df)
-            logger.info(f"[NODE RESULT] {node_result}")
+            logging.info(f"[NODE RESULT] {node_result}")
 
             self.outputs_dataframes[
                 node_id

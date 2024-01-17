@@ -9,11 +9,11 @@ shape = [5]
 with httpclient.InferenceServerClient("localhost:8000") as client:
     feates = [f"feat{i}" for i in range(1, 13)]
     all_val = [2 for i in range(len(feates))]
-    input0_data = np.array(["data_key", "mode", "Timestamp"] + feates).astype(
-        np.object_
-    )
+    input0_data = np.array(
+        ["data_key", "mode", "Timestamp", "serving_timestamp"] + feates
+    ).astype(np.object_)
 
-    values = ["chiller_test_7", "forward", 1577852940 + 1000] + all_val
+    values = ["chiller_test_7", "forward", 1577853940, 1577853940] + all_val
     values = [str(i) for i in values]
     input1_data = np.array(values).astype(np.object_)
 

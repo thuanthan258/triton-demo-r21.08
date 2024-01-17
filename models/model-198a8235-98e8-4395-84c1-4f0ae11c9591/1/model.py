@@ -415,7 +415,7 @@ class Node:
         # self.transform_class = read_class_from_file(
         #     module_path=module_path, class_name=transform_class
         # )(working_dir=config_path, **self.init_kwargs)
-        self.transform_class = import_class(module_path, transform_class)(
+        self.transform_class = import_class(f"config.{id}.code", transform_class)(
             working_dir=config_path, **self.init_kwargs
         )
         self.parents = parents  # list of Node objects

@@ -2,7 +2,7 @@ graph:
 - metadata:
     data_key: ''
     data_unit: second
-    max_historical_days: 3
+    max_historical_periods: 3
   topo_ids:
   - input
   - eadd2680-52a4-4c41-3bec-08dc1328c977

@@ -16,7 +16,6 @@ from pydantic_settings import BaseSettings
 from mls_ml_libs.db.timeseries import TimeseriesDBClient
 from data_processing_libs.serving.graph import Graph
 import importlib
-from data_processing_libs.utils import get_previous_timestamp
 
 
 class TestSettings(BaseSettings):

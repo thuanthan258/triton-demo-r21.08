@@ -409,6 +409,7 @@ class TritonPythonModel:
 
             del full_map["mode"]
             del full_map["data_key"]
+            del full_map["serving_timestamp"]
 
             columns = list(full_map.keys())
             features = [[float(i) for i in full_map.values()]]

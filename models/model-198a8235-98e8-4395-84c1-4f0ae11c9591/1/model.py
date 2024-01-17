@@ -412,9 +412,12 @@ class Node:
         self.id = id
         self.init_kwargs = init_kwargs
         module_path = os.path.join(config_path, "code.py")
-        self.transform_class = read_class_from_file(
-            module_path=module_path, class_name=transform_class
-        )(working_dir=config_path, **self.init_kwargs)
+        # self.transform_class = read_class_from_file(
+        #     module_path=module_path, class_name=transform_class
+        # )(working_dir=config_path, **self.init_kwargs)
+        self.transform_class = import_class(module_path, transform_class)(
+            working_dir=config_path, **self.init_kwargs
+        )
         self.parents = parents  # list of Node objects
         self.input_features = input_features
         self.expected_outputs = expected_outputs

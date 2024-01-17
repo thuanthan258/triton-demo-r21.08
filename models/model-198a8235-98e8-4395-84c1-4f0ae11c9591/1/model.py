@@ -136,6 +136,24 @@ class GetHistoryData:
         return df.iloc[-self.num_historical_periods :]
 
 
+def get_previous_timestamp(timestamp, nb_previous_periods: int, data_unit: str):
+    if data_unit == "second":
+        delta = timedelta(seconds=nb_previous_periods)
+    elif data_unit == "minute":
+        delta = timedelta(minutes=nb_previous_periods)
+    elif data_unit == "hour":
+        delta = timedelta(hours=nb_previous_periods)
+    elif data_unit == "day":
+        delta = timedelta(days=nb_previous_periods)
+    elif data_unit == "week":
+        delta = timedelta(weeks=nb_previous_periods)
+    else:
+        raise ValueError("Invalid data_unit")
+
+    previous_timestamp = timestamp - int(delta.total_seconds())
+    return previous_timestamp
+
+
 class Node:
     def __init__(
         self,

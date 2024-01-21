@@ -94,8 +94,7 @@ import inspect
 from urllib.parse import urljoin
 from pydantic_settings import BaseSettings
 import requests
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 QUERY_DATA_PATH = "tms/TimeSeries/query"
 REGISTER_METRICS_PATH = "tms/TimeSeries/register-metrics-labels"
@@ -683,7 +682,7 @@ class Graph:
             node_result = node.execute(node_input_df, self.mode)
 
             result = select_columns_for_backward(node_result, node.input_features)
-
+            logger.info(f"The result is {result}")
             self.update_parent_node_input_dataframe(result)
 
         result_df = self.outputs_dataframes["input"]

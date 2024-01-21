@@ -56,9 +56,12 @@ with httpclient.InferenceServerClient("localhost:8000") as client:
         "feat9_3",
     ]
     all_val = [2.0 for i in range(len(feates))]
-    input0_data = np.array(feates).astype(np.object_)
+    input0_data = np.array(["data_key", "mode", "serving_timestamp"] + feates).astype(
+        np.object_
+    )
 
-    values = [str(i) for i in all_val]
+    values = ["chiller_test_7", "backward", 1577853940] + all_val
+    values = [str(i) for i in values]
     input1_data = np.array(values).astype(np.object_)
 
     name_mapping = {i: i for i in feates}

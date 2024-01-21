@@ -5,14 +5,14 @@ input [
   {
     name: "INPUT0"
     data_type: TYPE_STRING
-    dims: [ 46 ]
+    dims: [ 49 ]
   }
 ]
 input [
   {
     name: "INPUT1"
     data_type: TYPE_STRING
-    dims: [ 46 ]
+    dims: [ 49 ]
   }
 ]
 input [

@@ -391,6 +391,10 @@ def import_class(module_path, class_name):
     return class_obj
 
 
+FORWARD = "forward"
+BACKWARD = "backward"
+
+
 class Node:
     def __init__(
         self,
@@ -422,7 +426,7 @@ class Node:
         self.expected_outputs = expected_outputs
         self.output = None
 
-    def execute(self, dataframe: pd.DataFrame):
+    def execute(self, dataframe: pd.DataFrame, mode: str = FORWARD):
         """
         Execute the transformation on the input dataframe.
 
@@ -433,18 +437,24 @@ class Node:
         pd.DataFrame: The output dataframe after transformation.
 
         """
-        if hasattr(self.transform_class, "forward") and callable(
-            getattr(self.transform_class, "forward")
+        if (
+            mode == FORWARD
+            and hasattr(self.transform_class, FORWARD)
+            and callable(getattr(self.transform_class, FORWARD))
         ):
             # Call the 'forward' method
             self.output = self.transform_class.forward(dataframe)
-            print("Result:", self.output)
-        else:
-            print("The 'forward' method does not exist in the class.")
+        elif (
+            mode == BACKWARD
+            and hasattr(self.transform_class, BACKWARD)
+            and callable(getattr(self.transform_class, BACKWARD))
+        ):
+            # Call the 'backward' method
+            self.output = self.transform_class.backward(dataframe)
 
         output_cols = self.output.columns
 
-        if not set(output_cols).issubset(self.expected_outputs):
+        if mode == FORWARD and not set(output_cols).issubset(self.expected_outputs):
             raise ValueError(
                 "[ERROR] Output data columns do not match: \n ",
                 "Output: \n",
@@ -454,10 +464,6 @@ class Node:
             )
 
         return self.output
-
-
-FORWARD = "forward"
-BACKWARD = "backward"
 
 
 def get_swap_dict(d):

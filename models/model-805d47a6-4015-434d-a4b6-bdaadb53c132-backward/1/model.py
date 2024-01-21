@@ -7,6 +7,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from loguru import logger
+import logging
 
 from typing import Optional
 from datetime import datetime
@@ -741,12 +742,6 @@ class TritonPythonModel:
         logger.log("Initialize-Specific Msg!", logger.INFO)
         now = datetime.now()  # current date and time
 
-        logging.basicConfig(
-            filename=f'{now.strftime("%Y%m%d%H%M%S")}-output.txt',
-            level=logging.DEBUG,
-            format="",
-        )
-
         responses = []
         for request in requests:
             block_output = {}
@@ -784,9 +779,6 @@ class TritonPythonModel:
 
             logger.log(f"[GRAPH] Initilizing....")
 
-            logging.info("[GRAPH] Initilizing....")
-            logging.info(f"[Input DF] {current_df}")
-
             config_path = str(Path(__file__).resolve().parent)
             self.graph.initialize(config_dir=config_path)
 
@@ -802,7 +794,6 @@ class TritonPythonModel:
                 logging=logging,
             )
 
-            logging.info(f"[FINAL RESULT] {result_df}")
             final_df = result_df
 
             out_0 = final_df.values[-1]

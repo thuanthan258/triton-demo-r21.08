@@ -7,6 +7,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from loguru import logger
+import logging
 
 from typing import Optional
 from datetime import datetime

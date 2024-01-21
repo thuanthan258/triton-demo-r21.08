@@ -1,4 +1,4 @@
-name: "model-a9bc1081-6349-49ce-88db-83d3850e4b89-backward"
+name: "model-805d47a6-4015-434d-a4b6-bdaadb53c132-forward"
 backend: "python"
 
 input [
@@ -26,14 +26,14 @@ output [
   {
     name: "OUTPUT0"
     data_type: TYPE_STRING
-    dims: [ {{output_dim}} ]
+    dims: [ 46 ]
   }
 ]
 output [
   {
     name: "OUTPUT1"
     data_type: TYPE_FP64
-    dims: [ {{output_dim}} ]
+    dims: [ 46 ]
   }
 ]
 

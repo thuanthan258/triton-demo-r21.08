@@ -1,0 +1,44 @@
+name: "model-f8579629-f18d-4ef2-9cad-caa77c0e6b37"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 16 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_STRING
+    dims: [ 16 ]
+  }
+]
+input [
+  {
+    name: "NAME_MAPPING"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ {{output_dim}} ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ {{output_dim}} ]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_CPU
+  }
+]

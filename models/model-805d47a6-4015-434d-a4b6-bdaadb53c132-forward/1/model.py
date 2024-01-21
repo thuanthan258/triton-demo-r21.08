@@ -495,7 +495,6 @@ class Graph:
                 parents=node_config["parents"],
                 input_features=node_config["inputs"],
                 expected_outputs=node_config["outputs"],
-                config_path=config_path,
             )
             self.add_node(node)
 

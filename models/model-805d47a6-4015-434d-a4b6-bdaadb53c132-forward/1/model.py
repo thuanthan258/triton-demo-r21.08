@@ -81,7 +81,6 @@ def select_columns_with_filter(dict_dfs, filters, logging=logging):
         if df_name in filters:
             filter_dict = filters[df_name]["mappings"]
             # print(df)
-            logging.info(f"[KEYS] {filter_dict.keys()}")
             df_with_cols = df[list(filter_dict.keys())].copy()
             filtered_df = df_with_cols.rename(columns=filter_dict)
             result_df = pd.concat([result_df, filtered_df], axis=1)
@@ -800,7 +799,6 @@ class TritonPythonModel:
                 name_mapping=data_mapping,
                 data_key=data_key,
                 to_timestamp=timestamp,
-                logging=logging,
             )
 
             logging.info(f"[FINAL RESULT] {result_df}")

@@ -15,7 +15,13 @@ input [
     dims: [ 46 ]
   }
 ]
-
+input [
+  {
+    name: "NAME_MAPPING"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
 output [
   {
     name: "OUTPUT0"

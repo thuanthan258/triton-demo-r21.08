@@ -656,8 +656,7 @@ class TritonPythonModel:
             logging.info(f"[Input DF] {current_df}")
 
             config_path = str(Path(__file__).resolve().parent)
-            self.config_path = os.path.join(config_path, "config/")
-            self.graph.initialize(config_dir=self.config_path)
+            self.graph.initialize(config_dir=config_path)
 
             logger.log(f"[GRAPH] Initilized")
 

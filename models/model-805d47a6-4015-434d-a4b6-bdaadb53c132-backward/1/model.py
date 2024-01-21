@@ -532,7 +532,9 @@ class Graph:
         # if history
         if self.history_data_retriever:
             logging.info("[GRAPH] [TIMESERIES] Querying data....")
-            query_features = [i for i in list(name_mapping.keys()) if i.lower() != "timestamp"]
+            query_features = [
+                i for i in list(name_mapping.keys()) if i.lower() != "timestamp"
+            ]
             history_data_df = self.history_data_retriever.query_timeseries_data(
                 feats=query_features,
                 data_key=data_key,
@@ -654,8 +656,7 @@ class TritonPythonModel:
             logging.info(f"[Input DF] {current_df}")
 
             config_path = str(Path(__file__).resolve().parent)
-            self.config_path = os.path.join(config_path, "config/")
-            self.graph.initialize(config_dir=self.config_path)
+            self.graph.initialize(config_dir=config_path)
 
             logger.log(f"[GRAPH] Initilized")
 

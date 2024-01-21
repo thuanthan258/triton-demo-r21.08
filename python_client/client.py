@@ -3,7 +3,7 @@ import tritonclient.http as httpclient
 import json
 import numpy as np
 
-model_name = "model-198a8235-98e8-4395-84c1-4f0ae11c9591"
+model_name = "model-805d47a6-4015-434d-a4b6-bdaadb53c132-forward"
 shape = [5]
 
 with httpclient.InferenceServerClient("localhost:8000") as client:

@@ -708,8 +708,7 @@ class Graph:
         """
         logger.info(data)
         for parent_node_id, parent_node_df in data.items():
-            if parent_node_id in self.outputs_dataframes.keys():
-                self.outputs_dataframes[parent_node_id].update(parent_node_df)
+            self.outputs_dataframes[parent_node_id].update(parent_node_df)
 
 
 class TritonPythonModel:

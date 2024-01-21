@@ -560,6 +560,7 @@ class Graph:
         for node_config in nodes_configs:
             node = Node(
                 id=node_config["id"],
+                config_path=os.path.join(config_dir, node_config["id"]),
                 init_kwargs=node_config["init_kwargs"],
                 transform_class=node_config["transform_class"],
                 parents=node_config["parents"],

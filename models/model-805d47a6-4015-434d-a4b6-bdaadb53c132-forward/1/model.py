@@ -456,6 +456,72 @@ class Node:
         return self.output
 
 
+FORWARD = "forward"
+BACKWARD = "backward"
+
+
+def get_swap_dict(d):
+    return {v: k for k, v in d.items()}
+
+
+def fill_nan_for_missing_columns(
+    df: pd.DataFrame, expected_columns: list
+) -> pd.DataFrame:
+    """
+    This function fills NaN for missing columns in a DataFrame.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        expected_columns (list): The list of expected columns.
+
+    Returns:
+        pd.DataFrame: The DataFrame with expected columns. If any column is missing in the input DataFrame,
+        it is added and filled with NaN.
+
+    Example:
+        >>> df = pd.DataFrame({'col1': [1, 2, 3], 'col2': [4, 5, 6]})
+        >>> expected_columns = ['col1', 'col2', 'col3']
+        >>> result = fill_nan_for_missing_columns(df, expected_columns)
+        >>> print(result)
+           col1  col2  col3
+        0     1     4   NaN
+        1     2     5   NaN
+        2     3     6   NaN
+    """
+    missing_cols = set(expected_columns) - set(df.columns)
+    for col in missing_cols:
+        df[col] = pd.NA
+    return df
+
+
+def select_columns_for_backward(data: pd.DataFrame, filters) -> dict:
+    """
+    Example:
+    >>> filters = {"df1": {"mappings": {"col1": "new_col1", "col2": "new_col2"}},
+                   >> > "df2": {"mappings": {"col1": "new_col1_1", "col2": "new_col2_1"}}}
+    >>> data = pd.DataFrame({'new_col1': [1, 2, 3], 'new_col2': [4, 5, 6], 'new_col1_1': [7, 8, 9], 'new_col2_1': [10, 11, 12]})
+    >>> result = select_columns_for_backward(data, filters)
+    >>> print(result)
+    {'df1':    col1  col2
+            0     1     4
+            1     2     5
+            2     3     6,
+    'df2':    col1  col2
+        0     7    10
+        1     8    11
+        2     9    12}
+    """
+
+    result = {}
+    for parent_node_id, node_data in filters.items():
+        name_mappings = get_swap_dict(node_data["mappings"])
+        node_columns = name_mappings.keys()
+        node_df_with_cols = data[node_columns].copy()
+        node_df = node_df_with_cols.rename(columns=name_mappings)
+        result[parent_node_id] = node_df
+    return result
+
+
 class Graph:
     def __init__(self, timeseries_client: TimeseriesDBClient = None):
         self.nodes = {}  # Stores node instances
@@ -463,8 +529,12 @@ class Graph:
         self.outputs_dataframes = {}  # Stores the output dataframes of the nodes
         self.topological_order = None  # Set topological order from yaml file
         self.history_data_retriever = None
-        self.timeseries_metadata = {}
+        self.metadata = {}
         self.timeseries_client = timeseries_client
+        self.mode = None
+
+    def reset(self):
+        self.__init__()
 
     def initialize(self, config_dir="./"):
         """
@@ -484,12 +554,12 @@ class Graph:
         nodes_configs = configs.get("nodes")
 
         self.topological_order = graph_configs[0]["topo_ids"]
+        self.metadata = graph_configs[0].get("metadata", {})
+        self.mode = self.metadata.get("mode", FORWARD)
 
-        config_path = os.path.join(config_dir, "config/")
         for node_config in nodes_configs:
             node = Node(
                 id=node_config["id"],
-                config_path=os.path.join(config_path, node_config["id"]),
                 init_kwargs=node_config["init_kwargs"],
                 transform_class=node_config["transform_class"],
                 parents=node_config["parents"],
@@ -498,14 +568,22 @@ class Graph:
             )
             self.add_node(node)
 
-        if graph_configs[0]["type"] == "timeseries":
-            self.timeseries_metadata = graph_configs[0].get("metadata", {})
+            # Initialize outputs_dataframe (in backward is the input df)
+            if self.mode == BACKWARD:
+                self.outputs_dataframes[node_config["id"]] = pd.DataFrame(
+                    np.nan, index=[0], columns=node.expected_outputs
+                )
+                if "input" in node.input_features:
+                    self.outputs_dataframes["input"] = pd.DataFrame(
+                        np.nan,
+                        index=[0],
+                        columns=node.input_features.get("input")["columns"],
+                    )
 
+        if graph_configs[0]["type"] == "timeseries":
             self.history_data_retriever = GetHistoryData(
-                num_historical_periods=self.timeseries_metadata.get(
-                    "max_historical_periods"
-                ),
-                data_unit=self.timeseries_metadata.get("data_unit"),
+                num_historical_periods=self.metadata.get("max_historical_periods"),
+                data_unit=self.metadata.get("data_unit"),
                 timescale_client=self.timeseries_client,
             )
 
@@ -521,57 +599,107 @@ class Graph:
 
     def execute(
         self,
-        logging,
         input_dataframe: pd.DataFrame,
         name_mapping: Dict = dict,
         to_timestamp: int = None,
         data_key: str = "",
-    ):
+    ) -> pd.DataFrame:
         """
         Given a self graph, execute the nodes in topological order
         """
 
-        logging.info("[GRAPH] Executing....")
         # if history
         if self.history_data_retriever:
-            logging.info("[GRAPH] [TIMESERIES] Querying data....")
-            query_features = [
-                i for i in list(name_mapping.keys()) if i.lower() != "timestamp"
-            ]
             history_data_df = self.history_data_retriever.query_timeseries_data(
-                feats=query_features,
+                feats=list(input_dataframe.columns),
                 data_key=data_key,
                 to_timestamp=to_timestamp,
                 name_mapping=name_mapping,
-                logging=logging,
             )
-            input_dataframe = pd.concat([history_data_df, input_dataframe], axis=0)
+            input_dataframe = pd.concat([input_dataframe, history_data_df], axis=0)
 
         self.outputs_dataframes["input"] = input_dataframe
 
-        for node_id in self.topological_order:  # renamed node_name to node_id
-            if node_id == "input":
-                continue
+        topo_order = self.topological_order
 
+        for node_id in topo_order:  # renamed node_name to node_id
             # Get node
             node = self.nodes[node_id]
 
             # Get node input df
             node_input_df = select_columns_with_filter(
-                self.outputs_dataframes, node.input_features, logging=logging
+                self.outputs_dataframes, node.input_features
             )
-            logger.info(f"[NODE INPUT DF] {node_input_df}")
 
             node_result = node.execute(node_input_df)
-            logger.info(f"[NODE RESULT] {node_result}")
 
-            self.outputs_dataframes[
-                node_id
-            ] = node_result  # renamed node_name to node_id
+            self.outputs_dataframes[node_id] = node_result
 
-        result_df = self.outputs_dataframes[self.topological_order[-1]]
+        result_df = self.outputs_dataframes[topo_order[-1]]
 
         return result_df
+
+    def backward(
+        self,
+        input_dataframe: pd.DataFrame,
+        name_mapping: Dict = dict,
+        to_timestamp: int = None,
+        data_key: str = "",
+    ) -> pd.DataFrame:
+        """
+        Given a self graph, execute backward the nodes in reverted topological order
+        """
+
+        # if history
+        if self.history_data_retriever:
+            history_data_df = self.history_data_retriever.query_timeseries_data(
+                feats=list(input_dataframe.columns),
+                data_key=data_key,
+                to_timestamp=to_timestamp,
+                name_mapping=name_mapping,
+            )
+            input_dataframe = pd.concat([history_data_df, input_dataframe], axis=0)
+
+        topo_order_reversed = self.topological_order[::-1]
+
+        self.outputs_dataframes[topo_order_reversed[0]] = input_dataframe
+
+        for node_id in topo_order_reversed:
+            node = self.nodes[node_id]
+
+            # Get node input df
+            node_input_df = fill_nan_for_missing_columns(
+                self.outputs_dataframes[node_id], node.expected_outputs
+            )
+
+            node_result = node.execute(node_input_df, self.mode)
+
+            result = select_columns_for_backward(node_result, node.input_features)
+
+            self.update_parent_node_input_dataframe(result)
+
+        result_df = self.outputs_dataframes["input"]
+
+        return result_df
+
+    def update_parent_node_input_dataframe(self, data: dict):
+        """
+        Distribute transformed data from node to parent node(s)
+
+        Example:
+        >>> df1 = pd.DataFrame({'col1': [1, 2, 3]})
+        >>> data = {"node1": df1}
+        >>> self.outputs_dataframes = {"node1": pd.DataFrame({'col1': [np.nan, np.nan, np.nan], 'col2': [4, 5, 6]}))}
+        >>> result = self.update_parent_node_input_dataframe(data)
+        >>> print(self.outputs_dataframes)
+        node1:
+           col1  col2
+        0     1     4
+        1     2     5
+        2     3     6
+        """
+        for parent_node_id, parent_node_df in data.items():
+            self.outputs_dataframes[parent_node_id].update(parent_node_df)
 
 
 class TritonPythonModel:

@@ -760,7 +760,7 @@ class TritonPythonModel:
             feats = [i.decode("ascii") for i in in_1.as_numpy()]
 
             full_map = dict(zip(cols, feats))
-            # mode = full_map["mode"]
+            mode = full_map["mode"]
             data_key = full_map["data_key"]
 
             timestamp = int(full_map["serving_timestamp"])
@@ -785,7 +785,6 @@ class TritonPythonModel:
             logger.log(f"[GRAPH] Initilized")
 
             logger.log(f"[GRAPH] Executing...")
-            mode = full_map["mode"]
             if mode == "backward":
                 result_df = self.graph.backward(input_dataframe=current_df)
             else:

@@ -282,6 +282,9 @@ class TimeseriesDBClient(object):
         """
         Send a POST request to the given URL with the given payload, and return the response.
         """
+        if not self.token:
+            self.token = self._oauth_client._get_new_token()["access_token"]
+
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
 
         response = requests.request(
@@ -411,10 +414,9 @@ class Node:
         """
         self.id = id
         self.init_kwargs = init_kwargs
-        module_path = os.path.join(config_path, "code.py")
-        self.transform_class = read_class_from_file(
-            module_path=module_path, class_name=transform_class
-        )(working_dir=config_path, **self.init_kwargs)
+        self.transform_class = import_class(f"config.{id}.code", transform_class)(
+            working_dir=config_path, **self.init_kwargs
+        )
         self.parents = parents  # list of Node objects
         self.input_features = input_features
         self.expected_outputs = expected_outputs
@@ -483,6 +485,7 @@ class Graph:
 
         self.topological_order = graph_configs[0]["topo_ids"]
 
+        config_path = os.path.join(config_dir, "config/")
         for node_config in nodes_configs:
             node = Node(
                 id=node_config["id"],
@@ -492,6 +495,7 @@ class Graph:
                 parents=node_config["parents"],
                 input_features=node_config["inputs"],
                 expected_outputs=node_config["outputs"],
+                config_path=config_path,
             )
             self.add_node(node)
 

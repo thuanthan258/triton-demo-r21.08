@@ -706,6 +706,7 @@ class Graph:
         1     2     5
         2     3     6
         """
+        logger.info(data)
         for parent_node_id, parent_node_df in data.items():
             if parent_node_id in self.outputs_dataframes.keys():
                 self.outputs_dataframes[parent_node_id].update(parent_node_df)

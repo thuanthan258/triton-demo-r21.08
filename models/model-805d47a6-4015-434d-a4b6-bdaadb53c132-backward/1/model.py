@@ -683,6 +683,7 @@ class Graph:
 
             result = select_columns_for_backward(node_result, node.input_features)
             logger.info(f"The result is {result}")
+            logger.info(f"The output dataframe {self.outputs_dataframes}")
             self.update_parent_node_input_dataframe(result)
 
         result_df = self.outputs_dataframes["input"]
@@ -705,7 +706,6 @@ class Graph:
         1     2     5
         2     3     6
         """
-        logger.info(data)
         for parent_node_id, parent_node_df in data.items():
             self.outputs_dataframes[parent_node_id].update(parent_node_df)
 

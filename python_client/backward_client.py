@@ -3,18 +3,62 @@ import tritonclient.http as httpclient
 import json
 import numpy as np
 
-model_name = "model-198a8235-98e8-4395-84c1-4f0ae11c9591"
+model_name = "model-805d47a6-4015-434d-a4b6-bdaadb53c132-backward"
 shape = [5]
 
 with httpclient.InferenceServerClient("localhost:8000") as client:
-    feates = [f"feat{i}" for i in range(1, 13)]
-    all_val = [2 for i in range(len(feates))]
-    input0_data = np.array(
-        ["data_key", "mode", "Timestamp", "serving_timestamp"] + feates
-    ).astype(np.object_)
+    feates = [
+        "feat12_22",
+        "feat12_22_22",
+        "feat1",
+        "feat10",
+        "feat10_1",
+        "feat10_2",
+        "feat10_3",
+        "feat11",
+        "feat11_1",
+        "feat11_2",
+        "feat11_3",
+        "feat1_1",
+        "feat1_2",
+        "feat1_3",
+        "feat2",
+        "feat2_1",
+        "feat2_2",
+        "feat2_3",
+        "feat3",
+        "feat3_1",
+        "feat3_2",
+        "feat3_3",
+        "feat4",
+        "feat4_1",
+        "feat4_2",
+        "feat4_3",
+        "feat5",
+        "feat5_1",
+        "feat5_2",
+        "feat5_3",
+        "feat6",
+        "feat6_1",
+        "feat6_2",
+        "feat6_3",
+        "feat7",
+        "feat7_1",
+        "feat7_2",
+        "feat7_3",
+        "feat8",
+        "feat8_1",
+        "feat8_2",
+        "feat8_3",
+        "feat9",
+        "feat9_1",
+        "feat9_2",
+        "feat9_3",
+    ]
+    all_val = [2.0 for i in range(len(feates))]
+    input0_data = np.array(feates).astype(np.object_)
 
-    values = ["chiller_test_7", "forward", 1577853940, 1577853940] + all_val
-    values = [str(i) for i in values]
+    values = [str(i) for i in all_val]
     input1_data = np.array(values).astype(np.object_)
 
     name_mapping = {i: i for i in feates}

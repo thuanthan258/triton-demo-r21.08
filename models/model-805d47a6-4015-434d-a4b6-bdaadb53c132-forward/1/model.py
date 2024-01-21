@@ -283,7 +283,7 @@ class TimeseriesDBClient(object):
         Send a POST request to the given URL with the given payload, and return the response.
         """
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-
+        logger.info(headers)
         response = requests.request(
             "POST",
             api_url,
@@ -532,7 +532,9 @@ class Graph:
         # if history
         if self.history_data_retriever:
             logging.info("[GRAPH] [TIMESERIES] Querying data....")
-            query_features = [i for i in list(name_mapping.keys()) if i.lower() != "timestamp"]
+            query_features = [
+                i for i in list(name_mapping.keys()) if i.lower() != "timestamp"
+            ]
             history_data_df = self.history_data_retriever.query_timeseries_data(
                 feats=query_features,
                 data_key=data_key,

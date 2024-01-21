@@ -785,13 +785,16 @@ class TritonPythonModel:
             logger.log(f"[GRAPH] Initilized")
 
             logger.log(f"[GRAPH] Executing...")
-
-            result_df = self.graph.execute(
-                input_dataframe=current_df,
-                name_mapping=data_mapping,
-                data_key=data_key,
-                to_timestamp=timestamp,
-            )
+            mode = full_map["mode"]
+            if mode == "backward":
+                result_df = self.graph.backward(input_dataframe=current_df)
+            else:
+                result_df = self.graph.execute(
+                    input_dataframe=current_df,
+                    name_mapping=data_mapping,
+                    data_key=data_key,
+                    to_timestamp=timestamp,
+                )
 
             final_df = result_df
 

@@ -682,8 +682,6 @@ class Graph:
             node_result = node.execute(node_input_df, self.mode)
 
             result = select_columns_for_backward(node_result, node.input_features)
-            logger.info(f"The result is {result.keys()}")
-            logger.info(f"The output dataframe {self.outputs_dataframes.keys()}")
             self.update_parent_node_input_dataframe(result)
 
         result_df = self.outputs_dataframes["input"]
@@ -707,8 +705,8 @@ class Graph:
         2     3     6
         """
         for parent_node_id, parent_node_df in data.items():
-            logger.info(self.outputs_dataframes.keys())
-            logger.info(parent_node_id)
+            print(self.outputs_dataframes.keys())
+            print(parent_node_id)
             if parent_node_id not in self.outputs_dataframes.keys():
                 continue
             self.outputs_dataframes[parent_node_id].update(parent_node_df)

@@ -3,7 +3,7 @@ graph:
     data_key: ''
     data_unit: second
     max_historical_periods: 0
-  mode: backward
+    mode: backward
   topo_ids:
   - 5ac674df-ad6f-45df-f8dd-08dc15ea238c
   - 429ca438-bc27-41db-f8da-08dc15ea238c

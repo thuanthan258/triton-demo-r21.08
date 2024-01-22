@@ -3,7 +3,7 @@ graph:
     data_key: ''
     data_unit: second
     max_historical_periods: 3
-  mode: forward
+    mode: forward
   topo_ids:
   - aee696a0-1395-414e-f8c4-08dc15ea238c
   - c4c5cead-63cb-4cd2-f8c9-08dc15ea238c

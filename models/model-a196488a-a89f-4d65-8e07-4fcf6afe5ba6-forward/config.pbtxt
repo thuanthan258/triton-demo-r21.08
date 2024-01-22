@@ -1,0 +1,44 @@
+name: "model-a196488a-a89f-4d65-8e07-4fcf6afe5ba6-forward"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 16 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_STRING
+    dims: [ 16 ]
+  }
+]
+input [
+  {
+    name: "NAME_MAPPING"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 45 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ 45 ]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_CPU
+  }
+]

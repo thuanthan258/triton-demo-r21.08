@@ -363,7 +363,6 @@ class GetHistoryData:
         to_timestamp: int,
         data_key: str,
         name_mapping: dict,
-        logging: logging,
     ):
         db_feats = [name_mapping[i] for i in feats]
         revert_mapping = {value: key for key, value in name_mapping.items()}

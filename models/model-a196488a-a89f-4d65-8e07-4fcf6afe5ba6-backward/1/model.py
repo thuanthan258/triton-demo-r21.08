@@ -709,6 +709,8 @@ class Graph:
         2     3     6
         """
         for parent_node_id, parent_node_df in data.items():
+            if parent_node_id not in self.outputs_dataframes:
+                continue
             self.outputs_dataframes[parent_node_id].update(parent_node_df)
 
 

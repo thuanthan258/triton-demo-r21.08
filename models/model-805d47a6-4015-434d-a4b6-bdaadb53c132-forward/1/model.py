@@ -364,7 +364,8 @@ class GetHistoryData:
         data_key: str,
         name_mapping: dict,
     ):
-        db_feats = [name_mapping[i] for i in feats]
+        query_feats = [i for i in feats if i.lower() != "timestamp"]
+        db_feats = [name_mapping[i] for i in query_feats]
         revert_mapping = {value: key for key, value in name_mapping.items()}
 
         from_timestamp = get_previous_timestamp(

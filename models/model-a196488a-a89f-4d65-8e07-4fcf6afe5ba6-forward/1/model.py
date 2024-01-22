@@ -96,12 +96,12 @@ class TritonPythonModel:
             full_map = dict(zip(cols, feats))
 
             data_key = full_map["data_key"]
-            timestamp = full_map["Timestamp"]
+            timestamp = full_map["serving_timestamp"]
             mode = full_map["mode"]
 
             del full_map["mode"]
             del full_map["data_key"]
-            del full_map["Timestamp"]
+            del full_map["serving_timestamp"]
 
             columns = list(full_map.keys())
             features = [[float(i) for i in full_map.values()]]

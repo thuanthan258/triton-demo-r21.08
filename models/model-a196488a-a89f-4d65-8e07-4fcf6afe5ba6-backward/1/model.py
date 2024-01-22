@@ -576,7 +576,9 @@ class Graph:
             self.add_node(node)
 
             # Initialize outputs_dataframe (in backward is the input df)
+            logger.info(f"The mode is {self.mode}")
             if self.mode == BACKWARD:
+                logger.info(f"Current node id: {node_config['id']}")
                 self.outputs_dataframes[node_config["id"]] = pd.DataFrame(
                     np.nan, index=[0], columns=node.expected_outputs
                 )

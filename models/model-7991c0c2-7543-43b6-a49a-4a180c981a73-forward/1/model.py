@@ -11,6 +11,7 @@ from datetime import datetime
 from pydantic_settings import BaseSettings
 
 from mls_ml_libs.db.timeseries import TimeseriesDBClient
+from mls_ml_libs.cache.redis_client import RedisClient
 from data_processing_libs.serving.graph import Graph
 
 

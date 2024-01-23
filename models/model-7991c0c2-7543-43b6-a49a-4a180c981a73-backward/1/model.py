@@ -95,7 +95,7 @@ class TritonPythonModel:
             full_map = dict(zip(cols, feats))
 
             data_key = full_map["data_key"]
-            timestamp = full_map["serving_timestamp"]
+            timestamp = int(full_map["serving_timestamp"])
             mode = full_map["mode"]
 
             del full_map["mode"]

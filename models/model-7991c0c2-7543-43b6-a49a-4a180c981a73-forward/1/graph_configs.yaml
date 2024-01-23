@@ -11,7 +11,7 @@ graph:
   - bfc468af-65b3-4c79-bf59-08dc1b3fa25f
   - 17da2638-5f8b-4a6f-bf5a-08dc1b3fa25f
   - output
-  type: normal
+  type: timeseries
 nodes:
 - id: 0abc3869-af40-484c-bf5d-08dc1b3fa25f
   init_kwargs: {}

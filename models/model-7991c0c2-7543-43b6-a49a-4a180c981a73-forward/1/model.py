@@ -34,7 +34,6 @@ settings = TestSettings()
 
 
 class TritonPythonModel:
-
     def initialize(self, args):
         """`initialize` is called only once when the model is being loaded.
         Implementing `initialize` function is optional. This function allows
@@ -59,7 +58,7 @@ class TritonPythonModel:
         self.client = TimeseriesDBClient(
             x_subscription_id=settings.x_subscription_id,
             x_tenant_id=settings.x_tenant_id,
-            settings=settings
+            settings=settings,
         )
 
         self.graph = Graph(self.client)
@@ -68,17 +67,19 @@ class TritonPythonModel:
         self.output1_dtype = np.object_
 
     def execute(self, requests):
-
         logger = pb_utils.Logger
         logger.log("Initialize-Specific Msg!", logger.INFO)
 
         now = datetime.now()  # current date and time
 
-        logging.basicConfig(filename=f'{now.strftime("%Y%m%d%H%M%S")}-output.txt', level=logging.DEBUG, format='')
+        logging.basicConfig(
+            filename=f'{now.strftime("%Y%m%d%H%M%S")}-output.txt',
+            level=logging.DEBUG,
+            format="",
+        )
 
         responses = []
         for request in requests:
-
             # Processing input requests data
             # mapping for query timeseries data
             mapping = pb_utils.get_input_tensor_by_name(request, "NAME_MAPPING")
@@ -94,12 +95,12 @@ class TritonPythonModel:
             full_map = dict(zip(cols, feats))
 
             data_key = full_map["data_key"]
-            timestamp = full_map['Timestamp']
+            timestamp = full_map["serving_timestamp"]
             mode = full_map["mode"]
 
             del full_map["mode"]
             del full_map["data_key"]
-            del full_map["Timestamp"]
+            del full_map["serving_timestamp"]
 
             columns = list(full_map.keys())
             features = [[float(i) for i in full_map.values()]]
@@ -108,7 +109,7 @@ class TritonPythonModel:
             logging.info(f"[REQUEST_DF]{request_df}")
             current_df = request_df.copy()
 
-            logging.info(f'[INPUT DF] {current_df}')
+            logging.info(f"[INPUT DF] {current_df}")
 
             config_path = str(Path(__file__).resolve().parent)
 
@@ -119,12 +120,14 @@ class TritonPythonModel:
 
             logging.info(f"[GRAPH] Initialized")
 
-            logging.info(f"[GRAPH] Executing:\n"
-                         f"- [TYPE]: {current_df}\n"
-                         f"- [CURRENT_DF]: {current_df}\n"
-                         f"- [DATA_MAPPING]: {data_mapping}\n"
-                         f"- [DATA_KEY]: {data_key}\n"
-                         f"- [TIMESTAMP]: {timestamp}\n")
+            logging.info(
+                f"[GRAPH] Executing:\n"
+                f"- [TYPE]: {current_df}\n"
+                f"- [CURRENT_DF]: {current_df}\n"
+                f"- [DATA_MAPPING]: {data_mapping}\n"
+                f"- [DATA_KEY]: {data_key}\n"
+                f"- [TIMESTAMP]: {timestamp}\n"
+            )
 
             if mode == "backward":
                 result_df = self.graph.backward(input_dataframe=current_df)
@@ -133,10 +136,12 @@ class TritonPythonModel:
                     input_dataframe=current_df,
                     name_mapping=data_mapping,
                     data_key=data_key,
-                    to_timestamp=timestamp
+                    to_timestamp=timestamp,
                 )
 
-            final_df = result_df.where(pd.notnull(result_df), 0)  # replace NaN to 0 for json response
+            final_df = result_df.where(
+                pd.notnull(result_df), 0
+            )  # replace NaN to 0 for json response
 
             logging.info(f"[FINAL RESULT] {final_df}")
 

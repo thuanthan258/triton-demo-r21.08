@@ -1,0 +1,44 @@
+name: "model-120e716c-2d8b-423a-99d6-ee78f061fdd1-backward"
+backend: "python"
+
+input [
+  {
+    name: "INPUT0"
+    data_type: TYPE_STRING
+    dims: [ 48 ]
+  }
+]
+input [
+  {
+    name: "INPUT1"
+    data_type: TYPE_STRING
+    dims: [ 48 ]
+  }
+]
+input [
+  {
+    name: "NAME_MAPPING"
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT0"
+    data_type: TYPE_STRING
+    dims: [ 13 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT1"
+    data_type: TYPE_FP64
+    dims: [ 13 ]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_CPU
+  }
+]

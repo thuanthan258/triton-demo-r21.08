@@ -1,0 +1,209 @@
+graph:
+- metadata:
+    data_key: ''
+    data_unit: second
+    max_historical_periods: 0
+    mode: forward
+    timestamp_column: null
+  target_columns:
+  - Generator Power
+  topo_ids:
+  - b2a2e7ea-b9e5-4e2d-0078-08dc36745385
+  - b9da8beb-5b3b-4222-0079-08dc36745385
+  - output
+  type: normal
+nodes:
+- id: b2a2e7ea-b9e5-4e2d-0078-08dc36745385
+  init_kwargs:
+    env_variables: {}
+  inputs:
+    input:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp
+        Generator Power: Generator Power
+        Timestamp: Timestamp
+  outputs:
+  - Timestamp
+  - Cooling Tower Inlet Temp
+  - Cooling Tower Outlet Temp
+  - Condenser Vacuum Pressure
+  - Generator Power
+  parents:
+  - input
+  transform_class: SampleClass
+- id: b2a2e7ea-b9e5-4e2d-0078-08dc36745385
+  init_kwargs:
+    env_variables: {}
+  inputs:
+    input:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp
+        Generator Power: Generator Power
+        Timestamp: Timestamp
+  outputs:
+  - Timestamp
+  - Cooling Tower Inlet Temp
+  - Cooling Tower Outlet Temp
+  - Condenser Vacuum Pressure
+  - Generator Power
+  parents:
+  - input
+  transform_class: SampleClass
+- id: b9da8beb-5b3b-4222-0079-08dc36745385
+  init_kwargs:
+    env_variables: {}
+  inputs:
+    input:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp
+        Generator Power: Generator Power
+        Timestamp: Timestamp
+  outputs:
+  - Timestamp
+  - Cooling Tower Inlet Temp
+  - Cooling Tower Outlet Temp
+  - Condenser Vacuum Pressure
+  - Generator Power
+  parents:
+  - input
+  transform_class: SampleClass
+- id: b9da8beb-5b3b-4222-0079-08dc36745385
+  init_kwargs:
+    env_variables: {}
+  inputs:
+    input:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp
+        Generator Power: Generator Power
+        Timestamp: Timestamp
+  outputs:
+  - Timestamp
+  - Cooling Tower Inlet Temp
+  - Cooling Tower Outlet Temp
+  - Condenser Vacuum Pressure
+  - Generator Power
+  parents:
+  - input
+  transform_class: SampleClass
+- id: output
+  init_kwargs:
+    env_variables: {}
+  inputs:
+    b2a2e7ea-b9e5-4e2d-0078-08dc36745385:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure_1
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp_1
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp_1
+        Generator Power: Generator Power_1
+        Timestamp: Timestamp_1
+    b9da8beb-5b3b-4222-0079-08dc36745385:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp
+        Generator Power: Generator Power
+        Timestamp: Timestamp
+  outputs:
+  - Timestamp
+  - Cooling Tower Inlet Temp
+  - Cooling Tower Outlet Temp
+  - Condenser Vacuum Pressure
+  - Generator Power
+  - Timestamp_1
+  - Cooling Tower Inlet Temp_1
+  - Cooling Tower Outlet Temp_1
+  - Condenser Vacuum Pressure_1
+  - Generator Power_1
+  parents:
+  - b9da8beb-5b3b-4222-0079-08dc36745385
+  - b2a2e7ea-b9e5-4e2d-0078-08dc36745385
+  transform_class: DefaultTransformer
+- id: output
+  init_kwargs:
+    env_variables: {}
+  inputs:
+    b2a2e7ea-b9e5-4e2d-0078-08dc36745385:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure_1
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp_1
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp_1
+        Generator Power: Generator Power_1
+        Timestamp: Timestamp_1
+    b9da8beb-5b3b-4222-0079-08dc36745385:
+      columns:
+      - Timestamp
+      - Generator Power
+      - Cooling Tower Inlet Temp
+      - Condenser Vacuum Pressure
+      - Cooling Tower Outlet Temp
+      mappings:
+        Condenser Vacuum Pressure: Condenser Vacuum Pressure
+        Cooling Tower Inlet Temp: Cooling Tower Inlet Temp
+        Cooling Tower Outlet Temp: Cooling Tower Outlet Temp
+        Generator Power: Generator Power
+        Timestamp: Timestamp
+  outputs:
+  - Timestamp
+  - Cooling Tower Inlet Temp
+  - Cooling Tower Outlet Temp
+  - Condenser Vacuum Pressure
+  - Generator Power
+  - Timestamp_1
+  - Cooling Tower Inlet Temp_1
+  - Cooling Tower Outlet Temp_1
+  - Condenser Vacuum Pressure_1
+  - Generator Power_1
+  parents:
+  - b9da8beb-5b3b-4222-0079-08dc36745385
+  - b2a2e7ea-b9e5-4e2d-0078-08dc36745385
+  transform_class: DefaultTransformer
